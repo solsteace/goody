@@ -1,7 +1,8 @@
 services:
   account:
     build:
-      context: ./account
+      dockerfile: ./account/Dockerfile
+      target: devel
     volumes:
       - ./account:/app/account
     ports:
@@ -17,7 +18,8 @@ services:
 
   outlet:
     build:
-      context: ./outlet
+      dockerfile: ./outlet/Dockerfile
+      target: devel
     ports:
       - 8881:8880
     volumes:
