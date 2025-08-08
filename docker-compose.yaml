@@ -1,0 +1,28 @@
+services:
+  account:
+    build:
+      context: ./account
+    volumes:
+      - ./account:/app/account
+    ports:
+      - 8880:8880
+
+  account-db:
+    image: mariadb:lts-ubi9
+    volumes:
+      - account-vol:/var/lib/mysql
+    environment:
+      MARIADB_ROOT_PASSWORD: what_would_it_be_i_wonder
+      MARIADB_PASSWORD: perhaps_i_should_try_this_one
+
+  outlet:
+    build:
+      context: ./outlet
+    ports:
+      - 8881:8880
+    volumes:
+      - ./outlet:/app/outlet
+
+volumes:
+  account-vol:
+
