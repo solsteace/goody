@@ -7,6 +7,8 @@ services:
       - ./account:/app/account
     ports:
       - 8880:8880
+    environment:
+      DB_URL: goodyapp:perhaps_i_should_try_this_one@tcp(account-db:3306)/goody
 
   account-db:
     image: mariadb:lts-ubi9
@@ -14,7 +16,9 @@ services:
       - account-vol:/var/lib/mysql
     environment:
       MARIADB_ROOT_PASSWORD: what_would_it_be_i_wonder
+      MARIADB_USER: goodyapp
       MARIADB_PASSWORD: perhaps_i_should_try_this_one
+      MARIADB_DATABASE: goody
 
   outlet:
     build:
