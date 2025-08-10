@@ -31,13 +31,13 @@ func NewAuthService(
 	}
 }
 
-func (as AuthService) login(phone, password string) (map[string]interface{}, error) {
-	user, err := as.userRepo.GetByPhoneNumber(phone)
+func (as AuthService) login(noTelp, kataSandi string) (map[string]interface{}, error) {
+	user, err := as.userRepo.GetByPhoneNumber(noTelp)
 	if err != nil {
 		return map[string]interface{}{}, err
 	}
 
-	if err := as.cryptor.Compare(user.KataSandi, password); err != nil {
+	if err := as.cryptor.Compare(user.KataSandi, kataSandi); err != nil {
 		return map[string]interface{}{}, errors.New("Password and phone number doesn't match")
 	}
 
@@ -79,16 +79,16 @@ func (as AuthService) login(phone, password string) (map[string]interface{}, err
 }
 
 func (as AuthService) register(
-	name,
-	password,
-	phone string,
-	birthdate time.Time,
-	occupation,
+	nama,
+	kataSandi,
+	noTelp string,
+	tanggalLahir time.Time,
+	pekerjaan,
 	email,
-	provinceId,
-	cityId string,
+	idProvinsi,
+	idKota string,
 ) error {
-	existingUser, err := as.userRepo.GetByPhoneNumber(phone)
+	existingUser, err := as.userRepo.GetByPhoneNumber(noTelp)
 	if err != nil {
 		if !errors.Is(err, appError.NotFound{}) {
 			return err
@@ -98,7 +98,7 @@ func (as AuthService) register(
 		return errors.New("This phone number is already used")
 	}
 
-	passDigest, err := as.cryptor.Generate(password)
+	passDigest, err := as.cryptor.Generate(kataSandi)
 	if err != nil {
 		return err
 	}
@@ -106,20 +106,20 @@ func (as AuthService) register(
 	// defaults (as per API documentation, these data
 	// weren't provided during registration)
 	isAdmin := false
-	gender, about := "anonim", ""
+	jenisKelamin, tentang := "anonim", ""
 	now := time.Now()
 	user, err := domain.NewUser(
-		name,
+		nama,
 		string(passDigest),
-		phone,
-		birthdate,
-		gender,
-		about,
-		occupation,
+		noTelp,
+		tanggalLahir,
+		jenisKelamin,
+		tentang,
+		pekerjaan,
 		email,
 		isAdmin,
-		provinceId,
-		cityId,
+		idProvinsi,
+		idKota,
 		now,
 		now)
 	if err != nil {

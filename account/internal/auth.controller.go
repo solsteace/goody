@@ -8,19 +8,19 @@ import (
 )
 
 type loginPayload struct {
-	Password string `json:"kata_sandi"`
-	Phone    string `json:"no_telp"`
+	KataSandi string `json:"kata_sandi"`
+	NoTelp    string `json:"no_telp"`
 }
 
 type registerPayload struct {
-	Name       string `json:"nama"`
-	Password   string `json:"kata_sandi"`
-	Phone      string `json:"no_telp"`
-	Birthdate  string `json:"tanggal_lahir"`
-	Occupation string `json:"pekerjaan"`
-	Email      string `json:"email"`
-	ProvinceId string `json:"id_provinsi"`
-	CityId     string `json:"id_kota"`
+	Nama         string `json:"nama"`
+	KataSandi    string `json:"kata_sandi"`
+	NoTelp       string `json:"no_telp"`
+	TanggalLahir string `json:"tanggal_lahir"`
+	Pekerjaan    string `json:"pekerjaan"`
+	Email        string `json:"email"`
+	IdProvinsi   string `json:"id_provinsi"`
+	IdKota       string `json:"id_kota"`
 }
 
 type AuthController struct {
@@ -39,7 +39,7 @@ func (ac AuthController) login(c *fiber.Ctx) error {
 		return err
 	}
 
-	resData, err := ac.service.login(reqPayload.Phone, reqPayload.Password)
+	resData, err := ac.service.login(reqPayload.NoTelp, reqPayload.KataSandi)
 	if err != nil {
 		return c.SendString(err.Error())
 	}
@@ -60,20 +60,20 @@ func (ac AuthController) register(c *fiber.Ctx) error {
 		return err
 	}
 
-	birthdate, err := time.Parse("02/01/2006", reqPayload.Birthdate)
+	birthdate, err := time.Parse("02/01/2006", reqPayload.TanggalLahir)
 	if err != nil {
 		return err
 	}
 
 	err = ac.service.register(
-		reqPayload.Name,
-		reqPayload.Password,
-		reqPayload.Phone,
+		reqPayload.Nama,
+		reqPayload.KataSandi,
+		reqPayload.NoTelp,
 		birthdate,
-		reqPayload.Occupation,
+		reqPayload.Pekerjaan,
 		reqPayload.Email,
-		reqPayload.ProvinceId,
-		reqPayload.CityId)
+		reqPayload.IdProvinsi,
+		reqPayload.IdKota)
 	if err != nil {
 		return err
 	}
