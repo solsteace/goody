@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/solsteace/goody/account/internal/lib/api"
+	"github.com/solsteace/goody/account/internal/lib/crypto"
 	"github.com/solsteace/goody/account/internal/lib/persistence"
 	"github.com/solsteace/goody/account/internal/repository"
 )
@@ -13,10 +15,12 @@ import (
 func NewApp() *fiber.App {
 	upSince := time.Now().Unix()
 	db := persistence.NewGorm(os.Getenv("DB_URL"))
+	cryptor := crypto.NewBcrypt(10)
+	indoApi := api.NewEmsifa("https://emsifa.github.io/api-wilayah-indonesia/api")
 
 	// Prepare layers...
 	userRepo := repository.NewGormUserRepo(db)
-	authService := NewAuthService(userRepo)
+	authService := NewAuthService(userRepo, cryptor, indoApi)
 	authController := NewAuthController(authService)
 
 	// Prepare endpoints...

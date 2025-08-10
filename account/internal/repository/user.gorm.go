@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/solsteace/goody/account/internal/domain"
+	"github.com/solsteace/goody/account/internal/lib/errors"
 	"gorm.io/gorm"
 )
 
@@ -26,7 +27,7 @@ type gormUser struct {
 	CreatedAt    time.Time `gorm:"column=created_at"`
 }
 
-func (gu gormUser) Convert() (domain.User, error) {
+func (gu gormUser) toUser() (domain.User, error) {
 	return domain.NewUser(
 		gu.Nama,
 		gu.KataSandi,
@@ -79,28 +80,36 @@ func (gur gormUserRepo) Migrate() {
 	gur.db.AutoMigrate(new(gormUser))
 }
 
-func (gur gormUserRepo) GetById(id int) (Userable, error) {
-	user := new(gormUser)
+func (gur gormUserRepo) GetById(id int) (domain.User, error) {
+	row := new(gormUser)
 	result := gur.db.
 		Where("id = ?", id).
-		First(&user)
-
+		First(&row)
 	if result.Error != nil {
-		return user, result.Error
+		return domain.User{}, errors.Standardize(result.Error)
 	}
-	return user, nil
+
+	user, err := row.toUser()
+	if err != nil {
+		return domain.User{}, errors.Standardize(err)
+	}
+	return user, errors.Standardize(err)
 }
 
-func (gur gormUserRepo) GetByPhoneNumber(phone string) (Userable, error) {
-	user := new(gormUser)
+func (gur gormUserRepo) GetByPhoneNumber(phone string) (domain.User, error) {
+	row := new(gormUser)
 	result := gur.db.
 		Where("no_telp = ?", phone).
-		First(&user)
-
+		First(&row)
 	if result.Error != nil {
-		return user, result.Error
+		return domain.User{}, errors.Standardize(result.Error)
 	}
-	return user, nil
+
+	user, err := row.toUser()
+	if err != nil {
+		return domain.User{}, errors.Standardize(result.Error)
+	}
+	return user, errors.Standardize(result.Error)
 }
 
 func (gur gormUserRepo) Create(u domain.User) (uint, error) {

@@ -2,38 +2,80 @@ package internal
 
 import (
 	"errors"
+	"sync"
 	"time"
 
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/solsteace/goody/account/internal/domain"
+	"github.com/solsteace/goody/account/internal/lib/api"
+	"github.com/solsteace/goody/account/internal/lib/crypto"
+	appError "github.com/solsteace/goody/account/internal/lib/errors"
 	"github.com/solsteace/goody/account/internal/repository"
 )
 
 type AuthService struct {
 	userRepo repository.User
+	cryptor  crypto.Cryptor
+	indoApi  api.Emsifa
 }
 
-func NewAuthService(ur repository.User) AuthService {
+func NewAuthService(
+	userRepo repository.User,
+	cryptor crypto.Cryptor,
+	indoApi api.Emsifa,
+) AuthService {
 	return AuthService{
-		userRepo: ur,
+		userRepo: userRepo,
+		cryptor:  cryptor,
+		indoApi:  indoApi,
 	}
 }
 
-func (as AuthService) login(phone, password string) error {
-	record, err := as.userRepo.GetByPhoneNumber(phone)
+func (as AuthService) login(phone, password string) (map[string]interface{}, error) {
+	user, err := as.userRepo.GetByPhoneNumber(phone)
 	if err != nil {
-		return err
+		return map[string]interface{}{}, err
 	}
 
-	user, err := record.Convert()
-	if err != nil {
-		return err
+	if err := as.cryptor.Compare(user.KataSandi, password); err != nil {
+		return map[string]interface{}{}, errors.New("Password and phone number doesn't match")
 	}
 
-	if password != user.KataSandi {
-		return errors.New("Wrong credentials")
-	}
+	wg := sync.WaitGroup{}
+	provinceChan := make(chan map[string]interface{}, 1)
+	cityChan := make(chan map[string]interface{}, 1)
+	go func() {
+		wg.Add(1)
+		province, err := as.indoApi.GetProvinceById(user.IdProvinsi)
+		if err != nil {
+			log.Warnf("Failed to fetch province info: %v", err)
+		}
+		provinceChan <- province
+		wg.Done()
+	}()
+	go func() {
+		wg.Add(1)
+		regency, err := as.indoApi.GetProvinceByRegencyId(user.IdKota)
+		if err != nil {
+			log.Warnf("Failed to fetch province info: %v", err)
+		}
+		cityChan <- regency
+		wg.Done()
+	}()
+	wg.Wait()
 
-	return nil
+	result := map[string]interface{}{
+		"nama":          user.Nama,
+		"no_telp":       user.NoTelp,
+		"tanggal_lahir": user.TanggalLahir,
+		"tentang":       user.Tentang,
+		"pekerjaan":     user.Pekerjaan,
+		"email":         user.Email,
+		"id_provinsi":   <-provinceChan,
+		"id_kota":       <-cityChan,
+		"token":         "my JWT token",
+	}
+	return result, nil
 }
 
 func (as AuthService) register(
@@ -45,16 +87,30 @@ func (as AuthService) register(
 	email,
 	provinceId,
 	cityId string,
-) (uint, error) {
-	// defaults (as per API documentation, these data weren't provided during registration)
-	isAdmin := false
-	gender := "anonim"
-	about := ""
-	now := time.Now()
+) error {
+	existingUser, err := as.userRepo.GetByPhoneNumber(phone)
+	if err != nil {
+		if !errors.Is(err, appError.NotFound{}) {
+			return err
+		}
+	}
+	if existingUser.ID != 0 {
+		return errors.New("This phone number is already used")
+	}
 
+	passDigest, err := as.cryptor.Generate(password)
+	if err != nil {
+		return err
+	}
+
+	// defaults (as per API documentation, these data
+	// weren't provided during registration)
+	isAdmin := false
+	gender, about := "anonim", ""
+	now := time.Now()
 	user, err := domain.NewUser(
 		name,
-		password,
+		string(passDigest),
 		phone,
 		birthdate,
 		gender,
@@ -67,12 +123,12 @@ func (as AuthService) register(
 		now,
 		now)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	id, err := as.userRepo.Create(user)
+	_, err = as.userRepo.Create(user)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	return id, nil
+	return nil
 }

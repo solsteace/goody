@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -34,45 +34,51 @@ func NewAuthController(as AuthService) AuthController {
 }
 
 func (ac AuthController) login(c *fiber.Ctx) error {
-	payload := new(loginPayload)
-	if err := c.BodyParser(payload); err != nil {
+	reqPayload := new(loginPayload)
+	if err := c.BodyParser(reqPayload); err != nil {
 		return err
 	}
 
-	err := ac.service.login(payload.Phone, payload.Password)
+	resData, err := ac.service.login(reqPayload.Phone, reqPayload.Password)
 	if err != nil {
-		c.SendString(err.Error())
-		return err
+		return c.SendString(err.Error())
 	}
 
-	c.SendString("Login OK!")
-	return nil
+	return c.
+		Status(http.StatusOK).
+		JSON(fiber.Map{
+			"status":  true,
+			"message": "Succeed to POST data",
+			"errors":  nil,
+			"data":    resData,
+		})
 }
 
 func (ac AuthController) register(c *fiber.Ctx) error {
-	payload := new(registerPayload)
-	if err := c.BodyParser(payload); err != nil {
+	reqPayload := new(registerPayload)
+	if err := c.BodyParser(reqPayload); err != nil {
 		return err
 	}
 
-	birthdate, err := time.Parse("02/01/2006", payload.Birthdate)
+	birthdate, err := time.Parse("02/01/2006", reqPayload.Birthdate)
 	if err != nil {
 		return err
 	}
 
-	newUserId, err := ac.service.register(
-		payload.Name,
-		payload.Password,
-		payload.Phone,
+	err = ac.service.register(
+		reqPayload.Name,
+		reqPayload.Password,
+		reqPayload.Phone,
 		birthdate,
-		payload.Occupation,
-		payload.Email,
-		payload.ProvinceId,
-		payload.CityId)
+		reqPayload.Occupation,
+		reqPayload.Email,
+		reqPayload.ProvinceId,
+		reqPayload.CityId)
 	if err != nil {
 		return err
 	}
 
-	c.SendString(fmt.Sprintf("Your user id %d", newUserId))
-	return nil
+	return c.
+		Status(http.StatusCreated).
+		SendString("Register Succeed")
 }
