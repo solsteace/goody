@@ -56,7 +56,7 @@ func NewUser(
 	return user, nil
 }
 
-func (u *User) WithId(id uint) User {
+func (u User) WithId(id uint) User {
 	u.ID = id
-	return *u
+	return u
 }

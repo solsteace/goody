@@ -11,24 +11,29 @@ import (
 // Proxy object between persistence layer using Gorm
 // and `User` domain object
 type gormUser struct {
-	ID           uint      `gorm:"column=id"`
-	Nama         string    `gorm:"column=nama"`
-	KataSandi    string    `gorm:"column=kata_sandi"`
-	NoTelp       string    `gorm:"column=no_telp"`
-	TanggalLahir time.Time `gorm:"column=tanggal_lahir"`
-	JenisKelamin string    `gorm:"column=jenis_kelamin"`
-	Tentang      string    `gorm:"column=tentang"`
-	Pekerjaan    string    `gorm:"column=pekerjaan"`
-	Email        string    `gorm:"column=email"`
-	IsAdmin      bool      `gorm:"column=is_admin"`
-	IdProvinsi   string    `gorm:"column=id_provinsi"`
-	IdKota       string    `gorm:"column=id_kota"`
-	UpdatedAt    time.Time `gorm:"column=updated_at"`
-	CreatedAt    time.Time `gorm:"column=created_at"`
+	ID           uint      `gorm:"column:id"`
+	Nama         string    `gorm:"column:nama"`
+	KataSandi    string    `gorm:"column:kata_sandi"`
+	NoTelp       string    `gorm:"column:no_telp"`
+	TanggalLahir time.Time `gorm:"column:tanggal_lahir"`
+	JenisKelamin string    `gorm:"column:jenis_kelamin"`
+	Tentang      string    `gorm:"column:tentang"`
+	Pekerjaan    string    `gorm:"column:pekerjaan"`
+	Email        string    `gorm:"column:email"`
+	IsAdmin      bool      `gorm:"column:is_admin"`
+	IdProvinsi   string    `gorm:"column:id_provinsi"`
+	IdKota       string    `gorm:"column:id_kota"`
+	UpdatedAt    time.Time `gorm:"column:updated_at"`
+	CreatedAt    time.Time `gorm:"column:created_at"`
+}
+
+// @ref https://gorm.io/docs/conventions.html#TableName
+func (gu gormUser) TableName() string {
+	return "users"
 }
 
 func (gu gormUser) toUser() (domain.User, error) {
-	return domain.NewUser(
+	user, err := domain.NewUser(
 		gu.Nama,
 		gu.KataSandi,
 		gu.NoTelp,
@@ -42,11 +47,11 @@ func (gu gormUser) toUser() (domain.User, error) {
 		gu.IdKota,
 		gu.UpdatedAt,
 		gu.CreatedAt)
-}
+	if err != nil {
+		return domain.User{}, err
+	}
 
-// @ref https://gorm.io/docs/conventions.html#TableName
-func (gu gormUser) TableName() string {
-	return "users"
+	return user.WithId(gu.ID), nil
 }
 
 func newGormUser(user domain.User) gormUser {
@@ -119,4 +124,15 @@ func (gur gormUserRepo) Create(u domain.User) (uint, error) {
 		return 0, result.Error
 	}
 	return user.ID, nil
+}
+
+func (gur gormUserRepo) Update(u domain.User) error {
+	user := newGormUser(u)
+	result := gur.db.
+		Where("id = ?", user.ID).
+		Updates(user)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
 }

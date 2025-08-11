@@ -29,12 +29,15 @@ func NewApp() *fiber.App {
 	// Prepare layers...
 	userRepo := repository.NewGormUserRepo(db)
 	authService := NewAuthService(userRepo, cryptor, indoApi, jwtAuth)
+	userService := NewUserService(userRepo, cryptor, indoApi)
 	authController := NewAuthController(authService)
+	userController := NewUserController(userService)
 
 	// Prepare endpoints...
 	app := fiber.New()
 	api := app.Group("/api")
 	registerAuthRoutes(&api, &authController)
+	registerUserRoutes(&api, &userController, jwtAuth)
 	api.Get("/health", func(c *fiber.Ctx) error {
 		upTime := time.Now().Unix() - upSince
 		return c.SendString(fmt.Sprintf("%d", upTime))

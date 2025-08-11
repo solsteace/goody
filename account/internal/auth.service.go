@@ -98,8 +98,7 @@ func (as AuthService) register(
 		return err
 	}
 
-	// defaults (as per API documentation, these data
-	// weren't provided during registration)
+	// defaults (as per API documentation, these data weren't provided during registration)
 	isAdmin := false
 	jenisKelamin, tentang := "anonim", ""
 	now := time.Now()
