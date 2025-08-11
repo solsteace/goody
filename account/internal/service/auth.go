@@ -1,4 +1,4 @@
-package internal
+package service
 
 import (
 	"errors"
@@ -34,7 +34,7 @@ func NewAuthService(
 	}
 }
 
-func (as AuthService) login(noTelp, kataSandi string) (map[string]any, error) {
+func (as AuthService) Login(noTelp, kataSandi string) (map[string]any, error) {
 	user, err := as.userRepo.GetByPhoneNumber(noTelp)
 	if err != nil {
 		return map[string]any{}, err
@@ -73,7 +73,7 @@ func (as AuthService) login(noTelp, kataSandi string) (map[string]any, error) {
 	return result, nil
 }
 
-func (as AuthService) register(
+func (as AuthService) Register(
 	nama,
 	kataSandi,
 	noTelp string,

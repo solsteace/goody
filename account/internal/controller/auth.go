@@ -1,10 +1,11 @@
-package internal
+package controller
 
 import (
 	"net/http"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/solsteace/goody/account/internal/service"
 )
 
 type loginPayload struct {
@@ -24,22 +25,22 @@ type registerPayload struct {
 }
 
 type AuthController struct {
-	service AuthService
+	service service.AuthService
 }
 
-func NewAuthController(as AuthService) AuthController {
+func NewAuthController(as service.AuthService) AuthController {
 	return AuthController{
 		service: as,
 	}
 }
 
-func (ac AuthController) login(c *fiber.Ctx) error {
+func (ac AuthController) Login(c *fiber.Ctx) error {
 	reqPayload := new(loginPayload)
 	if err := c.BodyParser(reqPayload); err != nil {
 		return err
 	}
 
-	resData, err := ac.service.login(reqPayload.NoTelp, reqPayload.KataSandi)
+	resData, err := ac.service.Login(reqPayload.NoTelp, reqPayload.KataSandi)
 	if err != nil {
 		return c.SendString(err.Error())
 	}
@@ -54,7 +55,7 @@ func (ac AuthController) login(c *fiber.Ctx) error {
 		})
 }
 
-func (ac AuthController) register(c *fiber.Ctx) error {
+func (ac AuthController) Register(c *fiber.Ctx) error {
 	reqPayload := new(registerPayload)
 	if err := c.BodyParser(reqPayload); err != nil {
 		return err
@@ -65,7 +66,7 @@ func (ac AuthController) register(c *fiber.Ctx) error {
 		return err
 	}
 
-	err = ac.service.register(
+	err = ac.service.Register(
 		reqPayload.Nama,
 		reqPayload.KataSandi,
 		reqPayload.NoTelp,

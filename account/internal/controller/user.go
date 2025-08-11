@@ -1,4 +1,4 @@
-package internal
+package controller
 
 import (
 	"errors"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/solsteace/goody/account/internal/lib/token/payload"
+	"github.com/solsteace/goody/account/internal/service"
 )
 
 type updateProfilePayload struct {
@@ -21,10 +22,10 @@ type updateProfilePayload struct {
 }
 
 type UserController struct {
-	service UserService
+	service service.UserService
 }
 
-func NewUserController(service UserService) UserController {
+func NewUserController(service service.UserService) UserController {
 	return UserController{service: service}
 }
 

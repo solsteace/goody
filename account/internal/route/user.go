@@ -1,16 +1,17 @@
-package internal
+package route
 
 import (
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/solsteace/goody/account/internal/controller"
 	"github.com/solsteace/goody/account/internal/lib/token"
 	"github.com/solsteace/goody/account/internal/lib/token/payload"
 )
 
-func registerUserRoutes(
+func RegisterUserRoutes(
 	parent *fiber.Router,
-	controller *UserController,
+	controller *controller.UserController,
 	tokenHandler token.Handler[payload.AuthPayload],
 ) {
 	user := (*parent).Group("/user")
