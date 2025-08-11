@@ -2,67 +2,62 @@ package internal
 
 import (
 	"errors"
-	"sync"
 	"time"
 
-	"github.com/gofiber/fiber/v2/log"
 	"github.com/solsteace/goody/account/internal/domain"
 	"github.com/solsteace/goody/account/internal/lib/api"
 	"github.com/solsteace/goody/account/internal/lib/crypto"
 	appError "github.com/solsteace/goody/account/internal/lib/errors"
+	"github.com/solsteace/goody/account/internal/lib/token"
+	"github.com/solsteace/goody/account/internal/lib/token/payload"
 	"github.com/solsteace/goody/account/internal/repository"
 )
 
 type AuthService struct {
-	userRepo repository.User
-	cryptor  crypto.Cryptor
-	indoApi  api.Emsifa
+	userRepo     repository.User
+	cryptor      crypto.Cryptor
+	indoApi      api.Emsifa
+	tokenHandler token.Handler[payload.AuthPayload]
 }
 
 func NewAuthService(
 	userRepo repository.User,
 	cryptor crypto.Cryptor,
 	indoApi api.Emsifa,
+	tokenHandler token.Handler[payload.AuthPayload],
 ) AuthService {
 	return AuthService{
-		userRepo: userRepo,
-		cryptor:  cryptor,
-		indoApi:  indoApi,
+		userRepo:     userRepo,
+		cryptor:      cryptor,
+		indoApi:      indoApi,
+		tokenHandler: tokenHandler,
 	}
 }
 
-func (as AuthService) login(noTelp, kataSandi string) (map[string]interface{}, error) {
+func (as AuthService) login(noTelp, kataSandi string) (map[string]any, error) {
 	user, err := as.userRepo.GetByPhoneNumber(noTelp)
 	if err != nil {
-		return map[string]interface{}{}, err
+		return map[string]any{}, err
 	}
+
+	// TODO: add rate limiting
 
 	if err := as.cryptor.Compare(user.KataSandi, kataSandi); err != nil {
-		return map[string]interface{}{}, errors.New("Password and phone number doesn't match")
+		return map[string]any{}, errors.New("Password and phone number doesn't match")
 	}
 
-	wg := sync.WaitGroup{}
-	provinceChan := make(chan map[string]interface{}, 1)
-	cityChan := make(chan map[string]interface{}, 1)
-	go func() {
-		wg.Add(1)
-		province, err := as.indoApi.GetProvinceById(user.IdProvinsi)
-		if err != nil {
-			log.Warnf("Failed to fetch province info: %v", err)
-		}
-		provinceChan <- province
-		wg.Done()
-	}()
-	go func() {
-		wg.Add(1)
-		regency, err := as.indoApi.GetProvinceByRegencyId(user.IdKota)
-		if err != nil {
-			log.Warnf("Failed to fetch province info: %v", err)
-		}
-		cityChan <- regency
-		wg.Done()
-	}()
-	wg.Wait()
+	provinceChan := make(chan map[string]any, 1)
+	cityChan := make(chan map[string]any, 1)
+	as.indoApi.GetProvinceAndRegencyById(
+		user.IdProvinsi,
+		user.IdKota,
+		provinceChan,
+		cityChan)
+
+	authToken, err := as.tokenHandler.Encode(payload.NewAuth(user.ID))
+	if err != nil {
+		return map[string]any{}, err
+	}
 
 	result := map[string]interface{}{
 		"nama":          user.Nama,
@@ -73,7 +68,7 @@ func (as AuthService) login(noTelp, kataSandi string) (map[string]interface{}, e
 		"email":         user.Email,
 		"id_provinsi":   <-provinceChan,
 		"id_kota":       <-cityChan,
-		"token":         "my JWT token",
+		"token":         authToken,
 	}
 	return result, nil
 }
