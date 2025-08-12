@@ -7,8 +7,9 @@ services:
       - ./account:/app/account
     ports:
       - 8880:8880
-    environment:
-      DB_URL: goodyapp:perhaps_i_should_try_this_one@tcp(account-db:3306)/goody?parseTime=true
+    env_file: 
+      - path: "./account/.env"
+        required: true
 
   account-db:
     image: mariadb:lts-ubi9
