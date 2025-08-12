@@ -85,7 +85,7 @@ func (gur gormUserRepo) Migrate() {
 	gur.db.AutoMigrate(new(gormUser))
 }
 
-func (gur gormUserRepo) GetById(id int) (domain.User, error) {
+func (gur gormUserRepo) GetById(id uint) (domain.User, error) {
 	row := new(gormUser)
 	result := gur.db.
 		Where("id = ?", id).

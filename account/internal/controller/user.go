@@ -12,13 +12,17 @@ import (
 
 type updateProfilePayload struct {
 	Nama         string `json:"nama"`
-	KataSandi    string `json:"kata_sandi"`
-	NoTelp       string `json:"no_telp"`
 	TanggalLahir string `json:"tanggal_lahir"`
 	Pekerjaan    string `json:"pekerjaan"`
-	Email        string `json:"email"`
 	IdProvinsi   string `json:"id_provinsi"`
 	IdKota       string `json:"id_kota"`
+}
+
+type changeCredentialsPayload struct {
+	NoTelp        string `json:"no_telp"`
+	Email         string `json:"email"`
+	KataSandiLama string `json:"kata_sandi_lama"`
+	KataSandiBaru string `json:"kata_sandi_baru"`
 }
 
 type UserController struct {
@@ -71,13 +75,43 @@ func (uc UserController) UpdateProfile(c *fiber.Ctx) error {
 	resPayload, err := uc.service.UpdateProfile(
 		userId,
 		reqPayload.Nama,
-		reqPayload.KataSandi,
-		reqPayload.NoTelp,
 		tanggalLahir,
 		reqPayload.Pekerjaan,
-		reqPayload.Email,
 		reqPayload.IdProvinsi,
 		reqPayload.IdKota,
+	)
+	if err != nil {
+		return err
+	}
+
+	return c.
+		Status(http.StatusOK).
+		JSON(fiber.Map{
+			"status":  true,
+			"message": "Succeed to POST data",
+			"errors":  nil,
+			"data":    resPayload,
+		})
+}
+
+func (uc UserController) ChangeCredentials(c *fiber.Ctx) error {
+	reqPayload := new(changeCredentialsPayload)
+	if err := c.BodyParser(reqPayload); err != nil {
+		return err
+	}
+
+	auth, ok := c.Locals("Authorization").(*payload.AuthPayload)
+	if !ok {
+		return errors.New("Payload wasn't found on `Authorization` token")
+	}
+
+	userId := auth.UserId
+	resPayload, err := uc.service.ChangeCredentials(
+		userId,
+		reqPayload.NoTelp,
+		reqPayload.Email,
+		reqPayload.KataSandiLama,
+		reqPayload.KataSandiBaru,
 	)
 	if err != nil {
 		return err

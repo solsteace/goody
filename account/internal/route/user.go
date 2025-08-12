@@ -35,4 +35,5 @@ func RegisterUserRoutes(
 	userV1 := user.Group("/v1")
 	userV1.Get("/", controller.GetProfile)
 	userV1.Put("/", controller.UpdateProfile)
+	userV1.Patch("/credentials", controller.ChangeCredentials)
 }
