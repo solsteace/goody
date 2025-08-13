@@ -2,6 +2,8 @@
 -- +goose StatementBegin
 SELECT 'up SQL query';
 -- +goose StatementEnd
+DROP TABLE IF EXISTS `users`;
+
 CREATE TABLE `users` (
     `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `nama` VARCHAR(255) NOT NULL,
@@ -15,8 +17,11 @@ CREATE TABLE `users` (
     `id_provinsi` VARCHAR(255) NOT NULL,
     `id_kota` VARCHAR(255) NOT NULL,
     `is_admin` BOOLEAN NOT NULL,
-    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP 
+    `updated_at` DATETIME NOT NULL 
+        ON UPDATE CURRENT_TIMESTAMP
+        DEFAULT CURRENT_TIMESTAMP,
+    `created_at` DATETIME NOT NULL 
+        DEFAULT CURRENT_TIMESTAMP 
 );
 
 -- +goose Down
