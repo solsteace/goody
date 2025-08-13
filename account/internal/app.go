@@ -28,16 +28,19 @@ func NewApp() *fiber.App {
 		time.Duration(EnvTokenLifetime))
 	indoApi := api.NewEmsifa(EnvIndoApiEndpoint)
 
+	alamatRepo := repository.NewGormAlamat(db)
 	userRepo := repository.NewGormUserRepo(db)
 	authService := service.NewAuthService(userRepo, cryptor, indoApi, jwtAuth)
+	alamatService := service.NewAlamatService(alamatRepo)
 	userService := service.NewUserService(userRepo, cryptor, indoApi)
 	authController := controller.NewAuthController(authService)
+	alamatController := controller.NewAlamatController(alamatService)
 	userController := controller.NewUserController(userService)
 
 	app := fiber.New()
 	api := app.Group("/api")
 	route.RegisterAuthRoutes(&api, &authController)
-	route.RegisterUserRoutes(&api, &userController, &jwtAuth)
+	route.RegisterUserRoutes(&api, &userController, &alamatController, &jwtAuth)
 	api.Get("/health", func(c *fiber.Ctx) error {
 		upTime := time.Now().Unix() - upSince
 		return c.SendString(fmt.Sprintf("%d", upTime))

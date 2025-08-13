@@ -10,7 +10,7 @@ import (
 
 // Proxy object between persistence layer using Gorm
 // and `User` domain object
-type gormUser struct {
+type gormUserRow struct {
 	ID           uint      `gorm:"column:id"`
 	Nama         string    `gorm:"column:nama"`
 	KataSandi    string    `gorm:"column:kata_sandi"`
@@ -28,11 +28,11 @@ type gormUser struct {
 }
 
 // @ref https://gorm.io/docs/conventions.html#TableName
-func (gu gormUser) TableName() string {
+func (gu gormUserRow) TableName() string {
 	return "users"
 }
 
-func (gu gormUser) toUser() (domain.User, error) {
+func (gu gormUserRow) toUser() (domain.User, error) {
 	user, err := domain.NewUser(
 		gu.Nama,
 		gu.KataSandi,
@@ -54,8 +54,8 @@ func (gu gormUser) toUser() (domain.User, error) {
 	return user.WithId(gu.ID), nil
 }
 
-func newGormUser(user domain.User) gormUser {
-	return gormUser{
+func newGormUserRow(user domain.User) gormUserRow {
+	return gormUserRow{
 		ID:           user.ID,
 		Nama:         user.Nama,
 		KataSandi:    user.KataSandi,
@@ -73,21 +73,21 @@ func newGormUser(user domain.User) gormUser {
 	}
 }
 
-type gormUserRepo struct {
+type gormUser struct {
 	db *gorm.DB
 }
 
-func NewGormUserRepo(db *gorm.DB) gormUserRepo {
-	return gormUserRepo{db: db}
+func NewGormUserRepo(db *gorm.DB) gormUser {
+	return gormUser{db: db}
 }
 
-func (gur gormUserRepo) Migrate() {
-	gur.db.AutoMigrate(new(gormUser))
+func (gu gormUser) Migrate() {
+	gu.db.AutoMigrate(new(gormUserRow))
 }
 
-func (gur gormUserRepo) GetById(id uint) (domain.User, error) {
-	row := new(gormUser)
-	result := gur.db.
+func (gu gormUser) GetById(id uint) (domain.User, error) {
+	row := new(gormUserRow)
+	result := gu.db.
 		Where("id = ?", id).
 		First(&row)
 	if result.Error != nil {
@@ -101,9 +101,9 @@ func (gur gormUserRepo) GetById(id uint) (domain.User, error) {
 	return user, errors.Standardize(err)
 }
 
-func (gur gormUserRepo) GetByPhoneNumber(phone string) (domain.User, error) {
-	row := new(gormUser)
-	result := gur.db.
+func (gu gormUser) GetByPhoneNumber(phone string) (domain.User, error) {
+	row := new(gormUserRow)
+	result := gu.db.
 		Where("no_telp = ?", phone).
 		First(&row)
 	if result.Error != nil {
@@ -117,18 +117,18 @@ func (gur gormUserRepo) GetByPhoneNumber(phone string) (domain.User, error) {
 	return user, errors.Standardize(result.Error)
 }
 
-func (gur gormUserRepo) Create(u domain.User) (uint, error) {
-	user := newGormUser(u)
-	result := gur.db.Create(&user)
+func (gu gormUser) Create(u domain.User) (uint, error) {
+	user := newGormUserRow(u)
+	result := gu.db.Create(&user)
 	if result.Error != nil {
 		return 0, result.Error
 	}
 	return user.ID, nil
 }
 
-func (gur gormUserRepo) Update(u domain.User) error {
-	user := newGormUser(u)
-	result := gur.db.
+func (gu gormUser) Update(u domain.User) error {
+	user := newGormUserRow(u)
+	result := gu.db.
 		Where("id = ?", user.ID).
 		Updates(user)
 	if result.Error != nil {

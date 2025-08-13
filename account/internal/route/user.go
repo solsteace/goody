@@ -11,13 +11,12 @@ import (
 
 func RegisterUserRoutes(
 	parent *fiber.Router,
-	controller *controller.UserController,
+	userController *controller.UserController,
+	alamatController *controller.AlamatController,
 	tokenHandler token.Handler[payload.AuthPayload],
 ) {
 	user := (*parent).Group("/user")
-
-	// TODO: Move to shared lib
-	user.Use(func(c *fiber.Ctx) error {
+	user.Use(func(c *fiber.Ctx) error { // TODO: Move to shared lib
 		token := c.Get("Authorization")
 		if token == "" {
 			return errors.New("Token not found")
@@ -32,8 +31,10 @@ func RegisterUserRoutes(
 		return c.Next()
 	})
 
+	registerAlamatRoutes(&user, alamatController)
+
 	userV1 := user.Group("/v1")
-	userV1.Get("/", controller.GetProfile)
-	userV1.Put("/", controller.UpdateProfile)
-	userV1.Patch("/credentials", controller.ChangeCredentials)
+	userV1.Get("/", userController.GetProfile)
+	userV1.Put("/", userController.UpdateProfile)
+	userV1.Patch("/credentials", userController.ChangeCredentials)
 }
