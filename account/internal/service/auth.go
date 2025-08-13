@@ -78,8 +78,11 @@ func (as AuthService) Register(
 	kataSandi,
 	noTelp string,
 	tanggalLahir time.Time,
+	jenisKelamin string,
+	tentang string,
 	pekerjaan,
-	email,
+	email string,
+	isAdmin bool,
 	idProvinsi,
 	idKota string,
 ) error {
@@ -98,9 +101,6 @@ func (as AuthService) Register(
 		return err
 	}
 
-	// defaults (as per API documentation, these data weren't provided during registration)
-	isAdmin := false
-	jenisKelamin, tentang := "anonim", ""
 	now := time.Now()
 	user, err := domain.NewUser(
 		nama,

@@ -18,8 +18,11 @@ type registerPayload struct {
 	KataSandi    string `json:"kata_sandi"`
 	NoTelp       string `json:"no_telp"`
 	TanggalLahir string `json:"tanggal_lahir"`
+	JenisKelamin string `json:"jenis_kelamin"`
+	Tentang      string `json:"tentang"`
 	Pekerjaan    string `json:"pekerjaan"`
 	Email        string `json:"email"`
+	IsAdmin      bool   `json:"is_admin"`
 	IdProvinsi   string `json:"id_provinsi"`
 	IdKota       string `json:"id_kota"`
 }
@@ -61,7 +64,7 @@ func (ac AuthController) Register(c *fiber.Ctx) error {
 		return err
 	}
 
-	birthdate, err := time.Parse("02/01/2006", reqPayload.TanggalLahir)
+	tanggalLahir, err := time.Parse("02/01/2006", reqPayload.TanggalLahir)
 	if err != nil {
 		return err
 	}
@@ -70,9 +73,12 @@ func (ac AuthController) Register(c *fiber.Ctx) error {
 		reqPayload.Nama,
 		reqPayload.KataSandi,
 		reqPayload.NoTelp,
-		birthdate,
+		tanggalLahir,
+		reqPayload.JenisKelamin,
+		reqPayload.Tentang,
 		reqPayload.Pekerjaan,
 		reqPayload.Email,
+		reqPayload.IsAdmin,
 		reqPayload.IdProvinsi,
 		reqPayload.IdKota)
 	if err != nil {
