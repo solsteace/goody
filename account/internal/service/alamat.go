@@ -25,8 +25,8 @@ func (as AlamatService) GetSelf(userId, offset, limit uint) (
 	if err != nil {
 		return result, err
 	}
-	result.Alamat = daftarAlamat
 
+	result.Alamat = daftarAlamat
 	return result, nil
 }
 
@@ -34,6 +34,7 @@ func (as AlamatService) GetById(userId, id uint) (
 	*struct{ Alamat domain.Alamat }, error,
 ) {
 	result := new(struct{ Alamat domain.Alamat })
+
 	alamat, err := as.repo.GetById(id)
 	if err != nil {
 		return result, err
@@ -100,7 +101,6 @@ func (as AlamatService) UpdateById(
 	if err := as.repo.Update(alamat); err != nil {
 		return err
 	}
-
 	return nil
 }
 

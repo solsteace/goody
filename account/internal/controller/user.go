@@ -10,21 +10,6 @@ import (
 	"github.com/solsteace/goody/account/internal/service"
 )
 
-type updateProfilePayload struct {
-	Nama         string `json:"nama"`
-	TanggalLahir string `json:"tanggal_lahir"`
-	Pekerjaan    string `json:"pekerjaan"`
-	IdProvinsi   string `json:"id_provinsi"`
-	IdKota       string `json:"id_kota"`
-}
-
-type changeCredentialsPayload struct {
-	NoTelp        string `json:"no_telp"`
-	Email         string `json:"email"`
-	KataSandiLama string `json:"kata_sandi_lama"`
-	KataSandiBaru string `json:"kata_sandi_baru"`
-}
-
 type UserController struct {
 	service service.UserService
 }
@@ -39,24 +24,37 @@ func (uc UserController) GetProfile(c *fiber.Ctx) error {
 		return errors.New("Payload wasn't found on `Authorization` token")
 	}
 
-	userId := auth.UserId
-	resPayload, err := uc.service.GetProfile(userId)
+	result, err := uc.service.GetProfile(auth.UserId)
 	if err != nil {
 		return err
 	}
 
+	resPayload := map[string]any{
+		"nama":          result.User.Nama,
+		"no_telp":       result.User.NoTelp,
+		"tanggal_lahir": result.User.TanggalLahir,
+		"tentang":       result.User.Tentang,
+		"pekerjaan":     result.User.Pekerjaan,
+		"email":         result.User.Email,
+		"id_provinsi":   <-result.Provinsi,
+		"id_kota":       <-result.Kota}
 	return c.
 		Status(http.StatusOK).
 		JSON(fiber.Map{
 			"status":  true,
 			"message": "Succeed to POST data",
 			"errors":  nil,
-			"data":    resPayload,
-		})
+			"data":    resPayload})
 }
 
 func (uc UserController) UpdateProfile(c *fiber.Ctx) error {
-	reqPayload := new(updateProfilePayload)
+	reqPayload := new(struct {
+		Nama         string `json:"nama"`
+		TanggalLahir string `json:"tanggal_lahir"`
+		Pekerjaan    string `json:"pekerjaan"`
+		IdProvinsi   string `json:"id_provinsi"`
+		IdKota       string `json:"id_kota"`
+	})
 	if err := c.BodyParser(reqPayload); err != nil {
 		return err
 	}
@@ -71,31 +69,42 @@ func (uc UserController) UpdateProfile(c *fiber.Ctx) error {
 		return err
 	}
 
-	userId := auth.UserId
-	resPayload, err := uc.service.UpdateProfile(
-		userId,
+	result, err := uc.service.UpdateProfile(
+		auth.UserId,
 		reqPayload.Nama,
 		tanggalLahir,
 		reqPayload.Pekerjaan,
 		reqPayload.IdProvinsi,
-		reqPayload.IdKota,
-	)
+		reqPayload.IdKota)
 	if err != nil {
 		return err
 	}
 
+	resPayload := map[string]any{
+		"nama":          result.User.Nama,
+		"no_telp":       result.User.NoTelp,
+		"tanggal_lahir": result.User.TanggalLahir,
+		"tentang":       result.User.Tentang,
+		"pekerjaan":     result.User.Pekerjaan,
+		"email":         result.User.Email,
+		"id_provinsi":   <-result.Provinsi,
+		"id_kota":       <-result.Kota}
 	return c.
 		Status(http.StatusOK).
 		JSON(fiber.Map{
 			"status":  true,
 			"message": "Succeed to POST data",
 			"errors":  nil,
-			"data":    resPayload,
-		})
+			"data":    resPayload})
 }
 
 func (uc UserController) ChangeCredentials(c *fiber.Ctx) error {
-	reqPayload := new(changeCredentialsPayload)
+	reqPayload := new(struct {
+		NoTelp        string `json:"no_telp"`
+		Email         string `json:"email"`
+		KataSandiLama string `json:"kata_sandi_lama"`
+		KataSandiBaru string `json:"kata_sandi_baru"`
+	})
 	if err := c.BodyParser(reqPayload); err != nil {
 		return err
 	}
@@ -105,24 +114,30 @@ func (uc UserController) ChangeCredentials(c *fiber.Ctx) error {
 		return errors.New("Payload wasn't found on `Authorization` token")
 	}
 
-	userId := auth.UserId
-	resPayload, err := uc.service.ChangeCredentials(
-		userId,
+	result, err := uc.service.ChangeCredentials(
+		auth.UserId,
 		reqPayload.NoTelp,
 		reqPayload.Email,
 		reqPayload.KataSandiLama,
-		reqPayload.KataSandiBaru,
-	)
+		reqPayload.KataSandiBaru)
 	if err != nil {
 		return err
 	}
 
+	resPayload := map[string]any{
+		"nama":          result.User.Nama,
+		"no_telp":       result.User.NoTelp,
+		"tanggal_lahir": result.User.TanggalLahir,
+		"tentang":       result.User.Tentang,
+		"pekerjaan":     result.User.Pekerjaan,
+		"email":         result.User.Email,
+		"id_provinsi":   <-result.Provinsi,
+		"id_kota":       <-result.Kota}
 	return c.
 		Status(http.StatusOK).
 		JSON(fiber.Map{
 			"status":  true,
 			"message": "Succeed to POST data",
 			"errors":  nil,
-			"data":    resPayload,
-		})
+			"data":    resPayload})
 }

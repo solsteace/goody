@@ -34,42 +34,47 @@ func NewAuthService(
 	}
 }
 
-func (as AuthService) Login(noTelp, kataSandi string) (map[string]any, error) {
+func (as AuthService) Login(noTelp, kataSandi string) (
+	*struct {
+		User         domain.User
+		Provinsi     <-chan map[string]any
+		Kota         <-chan map[string]any
+		AccessToken  string
+		RefreshToken string
+	},
+	error,
+) {
+	result := new(struct {
+		User         domain.User
+		Provinsi     <-chan map[string]any
+		Kota         <-chan map[string]any
+		AccessToken  string
+		RefreshToken string
+	})
+
 	user, err := as.userRepo.GetByPhoneNumber(noTelp)
 	if err != nil {
-		return map[string]any{}, err
+		return result, err
 	}
 
 	// TODO: add rate limiting
-
 	if err := as.cryptor.Compare(user.KataSandi, kataSandi); err != nil {
-		return map[string]any{}, errors.New("Password and phone number doesn't match")
+		return result, errors.New("Password and phone number doesn't match")
 	}
 
-	provinceChan := make(chan map[string]any, 1)
-	cityChan := make(chan map[string]any, 1)
-	as.indoApi.GetProvinceAndRegencyById(
-		user.IdProvinsi,
-		user.IdKota,
-		provinceChan,
-		cityChan)
+	provinsi := make(chan map[string]any, 1)
+	kota := make(chan map[string]any, 1)
+	as.indoApi.GetProvinceAndRegencyById(user.IdProvinsi, user.IdKota, provinsi, kota)
 
-	authToken, err := as.tokenHandler.Encode(payload.NewAuth(user.ID))
+	accessToken, err := as.tokenHandler.Encode(payload.NewAuth(user.ID))
 	if err != nil {
-		return map[string]any{}, err
+		return result, err
 	}
 
-	result := map[string]interface{}{
-		"nama":          user.Nama,
-		"no_telp":       user.NoTelp,
-		"tanggal_lahir": user.TanggalLahir,
-		"tentang":       user.Tentang,
-		"pekerjaan":     user.Pekerjaan,
-		"email":         user.Email,
-		"id_provinsi":   <-provinceChan,
-		"id_kota":       <-cityChan,
-		"token":         authToken,
-	}
+	result.User = user
+	result.AccessToken = accessToken
+	result.Provinsi = provinsi
+	result.Kota = kota
 	return result, nil
 }
 

@@ -3,6 +3,7 @@ package service
 import (
 	"time"
 
+	"github.com/solsteace/goody/account/internal/domain"
 	"github.com/solsteace/goody/account/internal/lib/api"
 	"github.com/solsteace/goody/account/internal/lib/crypto"
 	"github.com/solsteace/goody/account/internal/repository"
@@ -26,30 +27,36 @@ func NewUserService(
 	}
 }
 
-func (us UserService) GetProfile(userId uint) (map[string]any, error) {
+func (us UserService) GetProfile(userId uint) (
+	*struct {
+		User     domain.User
+		Provinsi <-chan map[string]any
+		Kota     <-chan map[string]any
+	},
+	error,
+) {
+	result := new(struct {
+		User     domain.User
+		Provinsi <-chan map[string]any
+		Kota     <-chan map[string]any
+	})
+
 	user, err := us.userRepo.GetById(userId)
 	if err != nil {
-		return map[string]any{}, err
+		return result, err
 	}
 
-	provinceChan := make(chan map[string]any, 1)
-	cityChan := make(chan map[string]any, 1)
+	provinsi := make(chan map[string]any, 1)
+	kota := make(chan map[string]any, 1)
 	us.indoApi.GetProvinceAndRegencyById(
 		user.IdProvinsi,
 		user.IdKota,
-		provinceChan,
-		cityChan)
+		provinsi,
+		kota)
 
-	result := map[string]any{
-		"nama":          user.Nama,
-		"no_telp":       user.NoTelp,
-		"tanggal_lahir": user.TanggalLahir,
-		"tentang":       user.Tentang,
-		"pekerjaan":     user.Pekerjaan,
-		"email":         user.Email,
-		"id_provinsi":   <-provinceChan,
-		"id_kota":       <-cityChan,
-	}
+	result.User = user
+	result.Provinsi = provinsi
+	result.Kota = kota
 	return result, nil
 }
 
@@ -60,10 +67,23 @@ func (us UserService) UpdateProfile(
 	pekerjaan,
 	idProvinsi,
 	idKota string,
-) (map[string]any, error) {
+) (
+	*struct {
+		User     domain.User
+		Provinsi <-chan map[string]any
+		Kota     <-chan map[string]any
+	},
+	error,
+) {
+	result := new(struct {
+		User     domain.User
+		Provinsi <-chan map[string]any
+		Kota     <-chan map[string]any
+	})
+
 	user, err := us.userRepo.GetById(userId)
 	if err != nil {
-		return map[string]any{}, err
+		return result, err
 	}
 
 	user.Nama = nama
@@ -72,29 +92,21 @@ func (us UserService) UpdateProfile(
 	user.IdProvinsi = idProvinsi
 	user.IdKota = idKota
 	user.UpdatedAt = time.Now()
-
 	if err := us.userRepo.Update(user); err != nil {
-		return map[string]any{}, err
+		return result, err
 	}
 
-	provinceChan := make(chan map[string]any, 1)
-	cityChan := make(chan map[string]any, 1)
+	provinsi := make(chan map[string]any, 1)
+	kota := make(chan map[string]any, 1)
 	us.indoApi.GetProvinceAndRegencyById(
 		user.IdProvinsi,
 		user.IdKota,
-		provinceChan,
-		cityChan)
+		provinsi,
+		kota)
 
-	result := map[string]any{
-		"nama":          user.Nama,
-		"no_telp":       user.NoTelp,
-		"tanggal_lahir": user.TanggalLahir,
-		"tentang":       user.Tentang,
-		"pekerjaan":     user.Pekerjaan,
-		"email":         user.Email,
-		"id_provinsi":   <-provinceChan,
-		"id_kota":       <-cityChan,
-	}
+	result.User = user
+	result.Provinsi = provinsi
+	result.Kota = kota
 	return result, nil
 }
 
@@ -104,14 +116,27 @@ func (us UserService) ChangeCredentials(
 	email string,
 	sandiLama,
 	sandiBaru string,
-) (map[string]any, error) {
+) (
+	*struct {
+		User     domain.User
+		Provinsi <-chan map[string]any
+		Kota     <-chan map[string]any
+	},
+	error,
+) {
+	result := new(struct {
+		User     domain.User
+		Provinsi <-chan map[string]any
+		Kota     <-chan map[string]any
+	})
+
 	user, err := us.userRepo.GetById(userId)
 	if err != nil {
-		return map[string]any{}, nil
+		return result, nil
 	}
 
 	if err := us.cryptor.Compare(user.KataSandi, sandiLama); err != nil {
-		return map[string]any{}, err
+		return result, err
 	}
 
 	user.Email = email
@@ -119,32 +144,25 @@ func (us UserService) ChangeCredentials(
 	if sandiLama != sandiBaru {
 		digest, err := us.cryptor.Generate(sandiBaru)
 		if err != nil {
-			return map[string]any{}, err
+			return result, err
 		}
 
 		user.KataSandi = string(digest)
 	}
 	if err := us.userRepo.Update(user); err != nil {
-		return map[string]any{}, err
+		return result, err
 	}
 
-	provinceChan := make(chan map[string]any, 1)
-	cityChan := make(chan map[string]any, 1)
+	provinsi := make(chan map[string]any, 1)
+	kota := make(chan map[string]any, 1)
 	us.indoApi.GetProvinceAndRegencyById(
 		user.IdProvinsi,
 		user.IdKota,
-		provinceChan,
-		cityChan)
+		provinsi,
+		kota)
 
-	result := map[string]any{
-		"nama":          user.Nama,
-		"no_telp":       user.NoTelp,
-		"tanggal_lahir": user.TanggalLahir,
-		"tentang":       user.Tentang,
-		"pekerjaan":     user.Pekerjaan,
-		"email":         user.Email,
-		"id_provinsi":   <-provinceChan,
-		"id_kota":       <-cityChan,
-	}
+	result.User = user
+	result.Provinsi = provinsi
+	result.Kota = kota
 	return result, nil
 }
