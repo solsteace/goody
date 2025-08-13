@@ -66,7 +66,7 @@ func (as AuthService) Login(noTelp, kataSandi string) (
 	kota := make(chan map[string]any, 1)
 	as.indoApi.GetProvinceAndRegencyById(user.IdProvinsi, user.IdKota, provinsi, kota)
 
-	accessToken, err := as.tokenHandler.Encode(payload.NewAuth(user.ID))
+	accessToken, err := as.tokenHandler.Encode(payload.NewAuth(user.ID, user.IsAdmin))
 	if err != nil {
 		return result, err
 	}

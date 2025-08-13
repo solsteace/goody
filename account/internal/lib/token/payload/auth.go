@@ -5,13 +5,14 @@ type Auth interface {
 }
 
 type AuthPayload struct {
-	UserId uint `json:"UserId"`
+	UserId  uint `json:"UserId"`
+	IsAdmin bool `json:"IsAdmin"`
 }
 
-func NewAuth(userId uint) AuthPayload {
+func NewAuth(userId uint, isAdmin bool) AuthPayload {
 	return AuthPayload{
-		UserId: userId,
-	}
+		UserId:  userId,
+		IsAdmin: isAdmin}
 }
 
 func (ap AuthPayload) GetUserId() uint {
