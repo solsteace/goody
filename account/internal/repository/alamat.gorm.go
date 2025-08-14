@@ -12,7 +12,7 @@ import (
 // and `Alamat` domain object
 type gormAlamatRow struct {
 	ID           uint      `gorm:"column:id"`
-	IdUser       uint      `gorm:"column:user_id"`
+	IdUser       uint      `gorm:"column:id_user"`
 	JudulAlamat  string    `gorm:"column:judul_alamat"`
 	NamaPenerima string    `gorm:"column:nama_penerima"`
 	NoTelp       string    `gorm:"column:no_telp"`
@@ -22,7 +22,7 @@ type gormAlamatRow struct {
 }
 
 func (row gormAlamatRow) TableName() string {
-	return "addresses"
+	return "alamat"
 }
 
 func (row gormAlamatRow) toAlamat() (domain.Alamat, error) {
@@ -63,7 +63,7 @@ func NewGormAlamat(db *gorm.DB) gormAlamat {
 func (ga gormAlamat) GetManyByUserId(userId, offset, limit uint) ([]domain.Alamat, error) {
 	rows := new([]gormAlamatRow)
 	result := ga.db.
-		Where("user_id = ?", userId).
+		Where("id_user = ?", userId).
 		Find(&rows)
 	if result.Error != nil {
 		return []domain.Alamat{}, errors.Standardize(result.Error)
