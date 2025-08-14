@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/solsteace/goody/account/internal/lib/token/payload"
 	"github.com/solsteace/goody/account/internal/service"
+	"github.com/solsteace/goody/lib/token/payload"
 )
 
 type AlamatController struct {

@@ -1,16 +1,21 @@
 services:
+  # gateway:
+  #   image: nginx:1.29
+  #   ports:
+  #     - 8080:80
+
   account:
     build:
       dockerfile: ./account/Dockerfile
       target: devel
     volumes:
       - ./account:/app/account
+      - ./lib:/app/lib
     ports:
       - 8880:8880
     env_file: 
       - path: "./account/.env"
         required: true
-
   account-db:
     image: mariadb:lts-ubi9
     volumes:
@@ -25,11 +30,25 @@ services:
     build:
       dockerfile: ./outlet/Dockerfile
       target: devel
-    ports:
-      - 8881:8880
     volumes:
       - ./outlet:/app/outlet
+      - ./lib:/app/lib
+    ports:
+      - 8881:8880
+    env_file: 
+      - path: "./outlet/.env"
+        required: true
+  # outlet-db:
+  #   image: mariadb:lts-ubi9
+  #   volumes:
+  #     - outlet-vol:/var/lib/mysql
+  #   environment:
+  #     MARIADB_ROOT_PASSWORD: what_would_it_be_i_wonder
+  #     MARIADB_USER: goodyapp
+  #     MARIADB_PASSWORD: perhaps_i_should_try_this_one
+  #     MARIADB_DATABASE: goody
 
 volumes:
   account-vol:
+  outlet-vol:
 

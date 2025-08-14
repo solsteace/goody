@@ -5,8 +5,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/solsteace/goody/account/internal/controller"
-	"github.com/solsteace/goody/account/internal/lib/token"
-	"github.com/solsteace/goody/account/internal/lib/token/payload"
+	"github.com/solsteace/goody/lib/token"
+	"github.com/solsteace/goody/lib/token/payload"
 )
 
 func RegisterUserRoutes(
@@ -16,7 +16,7 @@ func RegisterUserRoutes(
 	tokenHandler token.Handler[payload.AuthPayload],
 ) {
 	user := (*parent).Group("/user")
-	user.Use(func(c *fiber.Ctx) error { // TODO: Move to shared lib
+	user.Use(func(c *fiber.Ctx) error {
 		token := c.Get("Authorization")
 		if token == "" {
 			return errors.New("Token not found")

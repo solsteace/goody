@@ -4,12 +4,11 @@ import (
 	"time"
 
 	"github.com/solsteace/goody/account/internal/domain"
-	"github.com/solsteace/goody/account/internal/lib/errors"
+	"github.com/solsteace/goody/lib/errors"
 	"gorm.io/gorm"
 )
 
-// Proxy object between persistence layer using Gorm
-// and `Alamat` domain object
+// Proxy object between persistence layer using Gorm and `Alamat` domain object
 type gormAlamatRow struct {
 	ID           uint      `gorm:"column:id"`
 	IdUser       uint      `gorm:"column:id_user"`

@@ -10,15 +10,14 @@ import (
 	"github.com/solsteace/goody/account/internal/lib/crypto"
 	"github.com/solsteace/goody/account/internal/lib/persistence"
 	"github.com/solsteace/goody/account/internal/lib/token"
-	"github.com/solsteace/goody/account/internal/lib/token/payload"
 	"github.com/solsteace/goody/account/internal/repository"
 	"github.com/solsteace/goody/account/internal/route"
 	"github.com/solsteace/goody/account/internal/service"
+	"github.com/solsteace/goody/lib/token/payload"
 )
 
 func NewApp() *fiber.App {
 	loadEnv()
-
 	upSince := time.Now().Unix()
 	db := persistence.NewGorm(EnvDbUrl)
 	cryptor := crypto.NewBcrypt(10)

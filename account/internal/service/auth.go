@@ -7,10 +7,10 @@ import (
 	"github.com/solsteace/goody/account/internal/domain"
 	"github.com/solsteace/goody/account/internal/lib/api"
 	"github.com/solsteace/goody/account/internal/lib/crypto"
-	appError "github.com/solsteace/goody/account/internal/lib/errors"
-	"github.com/solsteace/goody/account/internal/lib/token"
-	"github.com/solsteace/goody/account/internal/lib/token/payload"
 	"github.com/solsteace/goody/account/internal/repository"
+	appError "github.com/solsteace/goody/lib/errors"
+	"github.com/solsteace/goody/lib/token"
+	"github.com/solsteace/goody/lib/token/payload"
 )
 
 type AuthService struct {

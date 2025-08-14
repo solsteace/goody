@@ -1,5 +1,10 @@
 FROM golang:1.24.6-alpine AS base
 WORKDIR /app
+RUN mkdir ./account ./lib
+COPY ./account/go.* ./account
+COPY ./lib/go.*  ./lib
+RUN go work init && go work use ./account ./lib
+
 
 FROM alpine/curl:latest AS devtools
 WORKDIR .
@@ -10,7 +15,6 @@ RUN curl -fsSL https://raw.githubusercontent.com/pressly/goose/master/install.sh
 
 
 FROM base AS devel
-WORKDIR ./account
 COPY --from=devtools /usr/local/bin /
 RUN go install github.com/air-verse/air@latest
-CMD ["air"]
+CMD ["air", "-c", "./account/.air.toml"]

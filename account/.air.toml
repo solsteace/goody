@@ -1,7 +1,7 @@
-root = "."
+root = "./account"
 
 [build]
-    cmd = "go build -o ./tmp/out ./cmd"
-    bin = "./tmp/out"
+    cmd = "go build -o ./account/tmp/out ./account/cmd/"
+    bin = "./account/tmp/out"
 [log]
     time = true
