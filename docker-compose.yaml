@@ -26,22 +26,22 @@ services:
       MARIADB_PASSWORD: perhaps_i_should_try_this_one
       MARIADB_DATABASE: goody
 
-  outlet:
+  catalog:
     build:
-      dockerfile: ./outlet/Dockerfile
+      dockerfile: ./catalog/Dockerfile
       target: devel
     volumes:
-      - ./outlet:/app/outlet
+      - ./catalog:/app/catalog
       - ./lib:/app/lib
     ports:
       - 8881:8880
     env_file: 
-      - path: "./outlet/.env"
+      - path: "./catalog/.env"
         required: true
-  # outlet-db:
+  # catalog-db:
   #   image: mariadb:lts-ubi9
   #   volumes:
-  #     - outlet-vol:/var/lib/mysql
+  #     - catalog-vol:/var/lib/mysql
   #   environment:
   #     MARIADB_ROOT_PASSWORD: what_would_it_be_i_wonder
   #     MARIADB_USER: goodyapp
@@ -50,5 +50,5 @@ services:
 
 volumes:
   account-vol:
-  outlet-vol:
+  catalog-vol:
 

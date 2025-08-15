@@ -1,4 +1,4 @@
-module github.com/solsteace/goody/outlet
+module github.com/solsteace/goody/catalog
 
 go 1.23.11
 

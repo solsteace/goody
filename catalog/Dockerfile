@@ -1,9 +1,9 @@
 FROM golang:1.24.6-alpine AS base
 WORKDIR /app
-RUN mkdir ./outlet ./lib
-COPY ./outlet/go.* ./outlet
+RUN mkdir ./catalog ./lib
+COPY ./catalog/go.* ./catalog
 COPY ./lib/go.*  ./lib
-RUN go work init && go work use ./outlet ./lib
+RUN go work init && go work use ./catalog ./lib
 
 
 FROM alpine/curl:latest AS devtools
@@ -17,4 +17,4 @@ RUN curl -fsSL https://raw.githubusercontent.com/pressly/goose/master/install.sh
 FROM base AS devel
 COPY --from=devtools /usr/local/bin /
 RUN go install github.com/air-verse/air@latest
-CMD ["air", "-c", "./outlet/.air.toml"]
+CMD ["air", "-c", "./catalog/.air.toml"]

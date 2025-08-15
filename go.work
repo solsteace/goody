@@ -3,5 +3,5 @@ go 1.23.11
 use (
 	./account
 	./lib
-	./outlet
+	./catalog
 )
