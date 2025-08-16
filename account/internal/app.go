@@ -28,18 +28,18 @@ func NewApp() *fiber.App {
 	indoApi := api.NewEmsifa(EnvIndoApiEndpoint)
 
 	alamatRepo := repository.NewGormAlamat(db)
-	userRepo := repository.NewGormUserRepo(db)
-	authService := service.NewAuthService(userRepo, cryptor, indoApi, jwtAuth)
-	alamatService := service.NewAlamatService(alamatRepo)
-	userService := service.NewUserService(userRepo, cryptor, indoApi)
-	authController := controller.NewAuthController(authService)
-	alamatController := controller.NewAlamatController(alamatService)
-	userController := controller.NewUserController(userService)
+	userRepo := repository.NewGormUser(db)
+	authService := service.NewAuth(userRepo, cryptor, indoApi, jwtAuth)
+	alamatService := service.NewAlamat(alamatRepo)
+	userService := service.NewUser(userRepo, cryptor, indoApi)
+	authController := controller.NewAuth(authService)
+	alamatController := controller.NewAlamat(alamatService)
+	userController := controller.NewUser(userService)
 
 	app := fiber.New()
 	api := app.Group("/api")
-	route.RegisterAuthRoutes(&api, &authController)
-	route.RegisterUserRoutes(&api, &userController, &alamatController, &jwtAuth)
+	route.UseAuth(&api, &authController)
+	route.UseUser(&api, &userController, &alamatController, &jwtAuth)
 	api.Get("/health", func(c *fiber.Ctx) error {
 		upTime := time.Now().Unix() - upSince
 		return c.SendString(fmt.Sprintf("%d", upTime))

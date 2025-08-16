@@ -5,15 +5,15 @@ import (
 	"github.com/solsteace/goody/account/internal/controller"
 )
 
-func registerAlamatRoutes(
+func UseAlamat(
 	parent *fiber.Router,
-	alamatController *controller.AlamatController,
+	controller *controller.Alamat,
 ) {
 	alamat := (*parent).Group("/alamat")
 	alamatV1 := alamat.Group("/v1")
-	alamatV1.Get("/", alamatController.GetSelf)
-	alamatV1.Get("/:id", alamatController.GetById)
-	alamatV1.Post("/", alamatController.CreateForSelf)
-	alamatV1.Put("/:id", alamatController.UpdateById)
-	alamatV1.Delete("/:id", alamatController.DeleteById)
+	alamatV1.Get("/", controller.GetSelf)
+	alamatV1.Get("/:id", controller.GetById)
+	alamatV1.Post("/", controller.CreateForSelf)
+	alamatV1.Put("/:id", controller.UpdateById)
+	alamatV1.Delete("/:id", controller.DeleteById)
 }

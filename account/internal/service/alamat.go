@@ -8,15 +8,15 @@ import (
 	"github.com/solsteace/goody/account/internal/repository"
 )
 
-type AlamatService struct {
+type Alamat struct {
 	repo repository.Alamat
 }
 
-func NewAlamatService(repo repository.Alamat) AlamatService {
-	return AlamatService{repo: repo}
+func NewAlamat(repo repository.Alamat) Alamat {
+	return Alamat{repo: repo}
 }
 
-func (as AlamatService) GetSelf(userId, offset, limit uint) (
+func (as Alamat) GetSelf(userId, offset, limit uint) (
 	*struct{ Alamat []domain.Alamat }, error,
 ) {
 	result := new(struct{ Alamat []domain.Alamat })
@@ -30,7 +30,7 @@ func (as AlamatService) GetSelf(userId, offset, limit uint) (
 	return result, nil
 }
 
-func (as AlamatService) GetById(userId, id uint) (
+func (as Alamat) GetById(userId, id uint) (
 	*struct{ Alamat domain.Alamat }, error,
 ) {
 	result := new(struct{ Alamat domain.Alamat })
@@ -47,7 +47,7 @@ func (as AlamatService) GetById(userId, id uint) (
 	return result, nil
 }
 
-func (as AlamatService) CreateForSelf(
+func (as Alamat) CreateForSelf(
 	userId uint,
 	judulAlamat string,
 	namaPenerima string,
@@ -78,7 +78,7 @@ func (as AlamatService) CreateForSelf(
 	return result, nil
 }
 
-func (as AlamatService) UpdateById(
+func (as Alamat) UpdateById(
 	userId uint,
 	id uint,
 	judulAlamat string,
@@ -104,7 +104,7 @@ func (as AlamatService) UpdateById(
 	return nil
 }
 
-func (as AlamatService) DeleteById(userId, id uint) error {
+func (as Alamat) DeleteById(userId, id uint) error {
 	alamat, err := as.repo.GetById(id)
 	if err != nil {
 		return err

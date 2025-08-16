@@ -9,15 +9,15 @@ import (
 	"github.com/solsteace/goody/lib/token/payload"
 )
 
-type AlamatController struct {
-	service service.AlamatService
+type Alamat struct {
+	service service.Alamat
 }
 
-func NewAlamatController(service service.AlamatService) AlamatController {
-	return AlamatController{service: service}
+func NewAlamat(service service.Alamat) Alamat {
+	return Alamat{service: service}
 }
 
-func (ac AlamatController) GetSelf(c *fiber.Ctx) error {
+func (ac Alamat) GetSelf(c *fiber.Ctx) error {
 	auth, ok := c.Locals("Authorization").(*payload.AuthPayload)
 	if !ok {
 		return errors.New("Payload wasn't found on `Authorization` token")
@@ -64,7 +64,7 @@ func (ac AlamatController) GetSelf(c *fiber.Ctx) error {
 		})
 }
 
-func (ac AlamatController) GetById(c *fiber.Ctx) error {
+func (ac Alamat) GetById(c *fiber.Ctx) error {
 	auth, ok := c.Locals("Authorization").(*payload.AuthPayload)
 	if !ok {
 		return errors.New("Payload wasn't found on `Authorization` token")
@@ -103,7 +103,7 @@ func (ac AlamatController) GetById(c *fiber.Ctx) error {
 		})
 }
 
-func (ac AlamatController) CreateForSelf(c *fiber.Ctx) error {
+func (ac Alamat) CreateForSelf(c *fiber.Ctx) error {
 	reqPayload := new(struct {
 		JudulAlamat  string `json:"judul_alamat"`
 		NamaPenerima string `json:"nama_penerima"`
@@ -140,7 +140,7 @@ func (ac AlamatController) CreateForSelf(c *fiber.Ctx) error {
 		})
 }
 
-func (ac AlamatController) UpdateById(c *fiber.Ctx) error {
+func (ac Alamat) UpdateById(c *fiber.Ctx) error {
 	reqPayload := new(struct {
 		JudulAlamat  string `json:"judul_alamat"`
 		NamaPenerima string `json:"nama_penerima"`
@@ -183,7 +183,7 @@ func (ac AlamatController) UpdateById(c *fiber.Ctx) error {
 		})
 }
 
-func (ac AlamatController) DeleteById(c *fiber.Ctx) error {
+func (ac Alamat) DeleteById(c *fiber.Ctx) error {
 	auth, ok := c.Locals("Authorization").(*payload.AuthPayload)
 	if !ok {
 		return errors.New("Payload wasn't found on `Authorization` token")

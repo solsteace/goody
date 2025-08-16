@@ -13,20 +13,20 @@ import (
 	"github.com/solsteace/goody/lib/token/payload"
 )
 
-type AuthService struct {
+type Auth struct {
 	userRepo     repository.User
 	cryptor      crypto.Cryptor
 	indoApi      api.Emsifa
 	tokenHandler token.Handler[payload.AuthPayload]
 }
 
-func NewAuthService(
+func NewAuth(
 	userRepo repository.User,
 	cryptor crypto.Cryptor,
 	indoApi api.Emsifa,
 	tokenHandler token.Handler[payload.AuthPayload],
-) AuthService {
-	return AuthService{
+) Auth {
+	return Auth{
 		userRepo:     userRepo,
 		cryptor:      cryptor,
 		indoApi:      indoApi,
@@ -34,7 +34,7 @@ func NewAuthService(
 	}
 }
 
-func (as AuthService) Login(noTelp, kataSandi string) (
+func (as Auth) Login(noTelp, kataSandi string) (
 	*struct {
 		User         domain.User
 		Provinsi     <-chan map[string]any
@@ -78,7 +78,7 @@ func (as AuthService) Login(noTelp, kataSandi string) (
 	return result, nil
 }
 
-func (as AuthService) Register(
+func (as Auth) Register(
 	nama,
 	kataSandi,
 	noTelp string,

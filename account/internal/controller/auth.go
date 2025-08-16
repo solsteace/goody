@@ -8,17 +8,17 @@ import (
 	"github.com/solsteace/goody/account/internal/service"
 )
 
-type AuthController struct {
-	service service.AuthService
+type Auth struct {
+	service service.Auth
 }
 
-func NewAuthController(as service.AuthService) AuthController {
-	return AuthController{
+func NewAuth(as service.Auth) Auth {
+	return Auth{
 		service: as,
 	}
 }
 
-func (ac AuthController) Login(c *fiber.Ctx) error {
+func (ac Auth) Login(c *fiber.Ctx) error {
 	reqPayload := new(struct {
 		KataSandi string `json:"kata_sandi"`
 		NoTelp    string `json:"no_telp"`
@@ -52,7 +52,7 @@ func (ac AuthController) Login(c *fiber.Ctx) error {
 		})
 }
 
-func (ac AuthController) Register(c *fiber.Ctx) error {
+func (ac Auth) Register(c *fiber.Ctx) error {
 	reqPayload := new(struct {
 		Nama         string `json:"nama"`
 		KataSandi    string `json:"kata_sandi"`

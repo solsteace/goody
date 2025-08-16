@@ -76,7 +76,7 @@ type gormUser struct {
 	db *gorm.DB
 }
 
-func NewGormUserRepo(db *gorm.DB) gormUser {
+func NewGormUser(db *gorm.DB) gormUser {
 	return gormUser{db: db}
 }
 

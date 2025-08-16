@@ -10,15 +10,15 @@ import (
 	"github.com/solsteace/goody/lib/token/payload"
 )
 
-type UserController struct {
-	service service.UserService
+type User struct {
+	service service.User
 }
 
-func NewUserController(service service.UserService) UserController {
-	return UserController{service: service}
+func NewUser(service service.User) User {
+	return User{service: service}
 }
 
-func (uc UserController) GetProfile(c *fiber.Ctx) error {
+func (uc User) GetProfile(c *fiber.Ctx) error {
 	auth, ok := c.Locals("Authorization").(*payload.AuthPayload)
 	if !ok {
 		return errors.New("Payload wasn't found on `Authorization` token")
@@ -47,7 +47,7 @@ func (uc UserController) GetProfile(c *fiber.Ctx) error {
 			"data":    resPayload})
 }
 
-func (uc UserController) UpdateProfile(c *fiber.Ctx) error {
+func (uc User) UpdateProfile(c *fiber.Ctx) error {
 	reqPayload := new(struct {
 		Nama         string `json:"nama"`
 		TanggalLahir string `json:"tanggal_lahir"`
@@ -98,7 +98,7 @@ func (uc UserController) UpdateProfile(c *fiber.Ctx) error {
 			"data":    resPayload})
 }
 
-func (uc UserController) ChangeCredentials(c *fiber.Ctx) error {
+func (uc User) ChangeCredentials(c *fiber.Ctx) error {
 	reqPayload := new(struct {
 		NoTelp        string `json:"no_telp"`
 		Email         string `json:"email"`

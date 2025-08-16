@@ -9,10 +9,10 @@ import (
 	"github.com/solsteace/goody/lib/token/payload"
 )
 
-func RegisterUserRoutes(
+func UseUser(
 	parent *fiber.Router,
-	userController *controller.UserController,
-	alamatController *controller.AlamatController,
+	userController *controller.User,
+	alamatController *controller.Alamat,
 	tokenHandler token.Handler[payload.AuthPayload],
 ) {
 	user := (*parent).Group("/user")
@@ -31,7 +31,7 @@ func RegisterUserRoutes(
 		return c.Next()
 	})
 
-	registerAlamatRoutes(&user, alamatController)
+	UseAlamat(&user, alamatController)
 
 	userV1 := user.Group("/v1")
 	userV1.Get("/", userController.GetProfile)

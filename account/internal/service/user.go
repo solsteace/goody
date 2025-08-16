@@ -9,25 +9,25 @@ import (
 	"github.com/solsteace/goody/account/internal/repository"
 )
 
-type UserService struct {
+type User struct {
 	userRepo repository.User
 	cryptor  crypto.Cryptor
 	indoApi  api.Emsifa
 }
 
-func NewUserService(
+func NewUser(
 	userRepo repository.User,
 	cryptor crypto.Cryptor,
 	indoApi api.Emsifa,
-) UserService {
-	return UserService{
+) User {
+	return User{
 		userRepo: userRepo,
 		cryptor:  cryptor,
 		indoApi:  indoApi,
 	}
 }
 
-func (us UserService) GetProfile(userId uint) (
+func (us User) GetProfile(userId uint) (
 	*struct {
 		User     domain.User
 		Provinsi <-chan map[string]any
@@ -60,7 +60,7 @@ func (us UserService) GetProfile(userId uint) (
 	return result, nil
 }
 
-func (us UserService) UpdateProfile(
+func (us User) UpdateProfile(
 	userId uint,
 	nama string,
 	tanggalLahir time.Time,
@@ -110,7 +110,7 @@ func (us UserService) UpdateProfile(
 	return result, nil
 }
 
-func (us UserService) ChangeCredentials(
+func (us User) ChangeCredentials(
 	userId uint,
 	noTelp string,
 	email string,

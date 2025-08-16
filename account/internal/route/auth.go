@@ -5,7 +5,7 @@ import (
 	"github.com/solsteace/goody/account/internal/controller"
 )
 
-func RegisterAuthRoutes(parent *fiber.Router, controller *controller.AuthController) {
+func UseAuth(parent *fiber.Router, controller *controller.Auth) {
 	auth := (*parent).Group("/auth")
 	authV1 := auth.Group("/v1")
 	authV1.Post("/login", controller.Login)
