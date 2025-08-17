@@ -1,8 +1,11 @@
 services:
-  # gateway:
-  #   image: nginx:1.29
-  #   ports:
-  #     - 8080:80
+  gateway:
+    image: caddy:2.10-alpine
+    ports:
+      - 8080:80
+    volumes:
+      - ./etc/caddy:/etc/caddy
+      - caddy-vol:/data
 
   account:
     build:
@@ -11,8 +14,6 @@ services:
     volumes:
       - ./account:/app/account
       - ./lib:/app/lib
-    ports:
-      - 8880:8880
     env_file: 
       - path: "./account/.env"
         required: true
@@ -33,22 +34,21 @@ services:
     volumes:
       - ./catalog:/app/catalog
       - ./lib:/app/lib
-    ports:
-      - 8881:8880
     env_file: 
       - path: "./catalog/.env"
         required: true
-  # catalog-db:
-  #   image: mariadb:lts-ubi9
-  #   volumes:
-  #     - catalog-vol:/var/lib/mysql
-  #   environment:
-  #     MARIADB_ROOT_PASSWORD: what_would_it_be_i_wonder
-  #     MARIADB_USER: goodyapp
-  #     MARIADB_PASSWORD: perhaps_i_should_try_this_one
-  #     MARIADB_DATABASE: goody
+  catalog-db:
+    image: mariadb:lts-ubi9
+    volumes:
+      - catalog-vol:/var/lib/mysql
+    environment:
+      MARIADB_ROOT_PASSWORD: what_would_it_be_i_wonder
+      MARIADB_USER: goodyapp
+      MARIADB_PASSWORD: perhaps_i_should_try_this_one
+      MARIADB_DATABASE: goody
 
 volumes:
+  caddy-vol:
   account-vol:
   catalog-vol:
 
