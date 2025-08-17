@@ -1,7 +1,7 @@
-root = "./outlet"
+root = "./catalog"
 
 [build]
-    cmd = "go build -o ./outlet/tmp/out ./outlet/cmd"
-    bin = "./outlet/tmp/out"
+    cmd = "go build -o ./catalog/tmp/out ./catalog/cmd"
+    bin = "./catalog/tmp/out"
 [log]
     time = true
