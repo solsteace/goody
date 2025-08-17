@@ -1,11 +1,14 @@
 package controller
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/solsteace/goody/account/internal/service"
+	"github.com/solsteace/goody/lib/token/payload"
 )
 
 type Auth struct {
@@ -94,4 +97,20 @@ func (ac Auth) Register(c *fiber.Ctx) error {
 	return c.
 		Status(http.StatusCreated).
 		SendString("Register Succeed")
+}
+
+func (ac Auth) Infer(c *fiber.Ctx) error {
+	auth, ok := c.Locals("Authorization").(*payload.AuthPayload)
+	if !ok {
+		return errors.New("Valid payload wasn't found on token")
+	}
+
+	isAdmin := "0"
+	if auth.IsAdmin {
+		isAdmin = "1"
+	}
+
+	c.Response().Header.Add("X-User-Id", fmt.Sprintf("%d", auth.UserId))
+	c.Response().Header.Add("X-User-IsAdmin", isAdmin)
+	return c.SendStatus(http.StatusOK)
 }

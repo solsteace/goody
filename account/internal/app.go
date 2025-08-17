@@ -8,6 +8,7 @@ import (
 	"github.com/solsteace/goody/account/internal/controller"
 	"github.com/solsteace/goody/account/internal/lib/api"
 	"github.com/solsteace/goody/account/internal/lib/crypto"
+	"github.com/solsteace/goody/account/internal/lib/middleware"
 	"github.com/solsteace/goody/account/internal/lib/persistence"
 	"github.com/solsteace/goody/account/internal/lib/token"
 	"github.com/solsteace/goody/account/internal/repository"
@@ -26,6 +27,7 @@ func NewApp() *fiber.App {
 		EnvTokenSecret,
 		time.Duration(EnvTokenLifetime))
 	indoApi := api.NewEmsifa(EnvIndoApiEndpoint)
+	authToken := middleware.NewAuthToken(jwtAuth)
 
 	alamatRepo := repository.NewGormAlamat(db)
 	userRepo := repository.NewGormUser(db)
@@ -38,8 +40,8 @@ func NewApp() *fiber.App {
 
 	app := fiber.New()
 	api := app.Group("/api")
-	route.UseAuth(&api, &authController)
-	route.UseUser(&api, &userController, &alamatController, &jwtAuth)
+	route.UseAuth(&api, &authController, authToken)
+	route.UseUser(&api, &userController, &alamatController, authToken)
 	api.Get("/health", func(c *fiber.Ctx) error {
 		upTime := time.Now().Unix() - upSince
 		return c.SendString(fmt.Sprintf("%d", upTime))
