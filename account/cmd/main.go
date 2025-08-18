@@ -5,6 +5,5 @@ import (
 )
 
 func main() {
-	app := internal.NewApp()
-	app.Listen(":8880")
+	internal.RunApp()
 }

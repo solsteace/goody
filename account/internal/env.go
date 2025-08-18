@@ -7,6 +7,9 @@ import (
 )
 
 var (
+	// The port the app would run on
+	EnvPort uint
+
 	// The url of the main database
 	EnvDbUrl string
 
@@ -22,6 +25,14 @@ var (
 )
 
 func loadEnv() {
+	port, err := strconv.ParseUint(os.Getenv("PORT"), 10, 64)
+	if err != nil {
+		log.Fatalf("`PORT`: %v", err)
+	} else if port := uint(port); port < 0 || port > 65535 {
+		log.Fatal("`PORT` should be between 0 - 65535")
+	}
+	EnvPort = uint(port)
+
 	EnvDbUrl = os.Getenv("DB_URL")
 	EnvTokenIssuer = os.Getenv("TOKEN_ISSUER")
 	EnvTokenSecret = os.Getenv("TOKEN_SECRET")

@@ -17,7 +17,7 @@ import (
 	"github.com/solsteace/goody/lib/token/payload"
 )
 
-func NewApp() *fiber.App {
+func RunApp() {
 	loadEnv()
 	upSince := time.Now().Unix()
 	db := persistence.NewGorm(EnvDbUrl)
@@ -47,5 +47,5 @@ func NewApp() *fiber.App {
 		return c.SendString(fmt.Sprintf("%d", upTime))
 	})
 
-	return app
+	app.Listen(fmt.Sprintf(":%d", EnvPort))
 }
