@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/solsteace/goody/account/internal/domain"
@@ -18,6 +19,8 @@ type Auth struct {
 	cryptor      crypto.Cryptor
 	indoApi      api.Emsifa
 	tokenHandler token.Handler[payload.AuthPayload]
+
+	onNewUser []func(u domain.User) error
 }
 
 func NewAuth(
@@ -30,8 +33,12 @@ func NewAuth(
 		userRepo:     userRepo,
 		cryptor:      cryptor,
 		indoApi:      indoApi,
-		tokenHandler: tokenHandler,
-	}
+		tokenHandler: tokenHandler}
+}
+
+// Adds an observer to respond whenever a user had registered
+func (as *Auth) SubscribeOnNewUser(fx func(u domain.User) error) {
+	as.onNewUser = append(as.onNewUser, fx)
 }
 
 func (as Auth) Login(noTelp, kataSandi string) (
@@ -125,9 +132,18 @@ func (as Auth) Register(
 		return err
 	}
 
-	_, err = as.userRepo.Create(user)
+	userId, err := as.userRepo.Create(user)
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(as.onNewUser)
+	user.ID = userId
+	for _, fx := range as.onNewUser {
+		if err := fx(user); err != nil {
+			fmt.Printf("Warning! Error on `NewUser` observer: %v\n", err)
+		}
+	}
+
 	return nil
 }

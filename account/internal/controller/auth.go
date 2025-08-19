@@ -12,13 +12,11 @@ import (
 )
 
 type Auth struct {
-	service service.Auth
+	service *service.Auth
 }
 
-func NewAuth(as service.Auth) Auth {
-	return Auth{
-		service: as,
-	}
+func NewAuth(service *service.Auth) Auth {
+	return Auth{service: service}
 }
 
 func (ac Auth) Login(c *fiber.Ctx) error {

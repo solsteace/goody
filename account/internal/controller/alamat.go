@@ -10,10 +10,10 @@ import (
 )
 
 type Alamat struct {
-	service service.Alamat
+	service *service.Alamat
 }
 
-func NewAlamat(service service.Alamat) Alamat {
+func NewAlamat(service *service.Alamat) Alamat {
 	return Alamat{service: service}
 }
 

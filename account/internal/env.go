@@ -13,6 +13,9 @@ var (
 	// The url of the main database
 	EnvDbUrl string
 
+	// The Url of message queue
+	EnvMqUrl string
+
 	// String to be set on JWT token `iss` claim
 	EnvTokenIssuer string
 	// String to be used to sign JWT tokens
@@ -33,6 +36,7 @@ func loadEnv() {
 	}
 	EnvPort = uint(port)
 
+	EnvMqUrl = os.Getenv("MQ_URL")
 	EnvDbUrl = os.Getenv("DB_URL")
 	EnvTokenIssuer = os.Getenv("TOKEN_ISSUER")
 	EnvTokenSecret = os.Getenv("TOKEN_SECRET")
