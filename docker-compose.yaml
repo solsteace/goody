@@ -2,10 +2,18 @@ services:
   gateway:
     image: caddy:2.10-alpine
     ports:
-      - 8080:80
+      - 8888:80
     volumes:
       - ./etc/caddy:/etc/caddy
       - caddy-vol:/data
+
+  mq:
+    image: rabbitmq:4.1-management-alpine
+    ports:
+      - 5672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: goody
+      RABBITMQ_DEFAULT_PASS: goodypass
 
   account:
     build:
@@ -46,7 +54,6 @@ services:
       MARIADB_USER: goodyapp
       MARIADB_PASSWORD: perhaps_i_should_try_this_one
       MARIADB_DATABASE: goody
-
 volumes:
   caddy-vol:
   account-vol:
