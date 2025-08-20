@@ -1,11 +1,9 @@
 package main
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"github.com/solsteace/goody/catalog/internal"
 )
 
 func main() {
-	// app := internal.NewApp()
-	app := fiber.New()
-	app.Listen(":8880")
+	internal.RunApp()
 }
