@@ -23,9 +23,9 @@ func (ac Alamat) GetSelf(c *fiber.Ctx) error {
 		return errors.New("Payload wasn't found on `Authorization` token")
 	}
 
-	offset := uint(c.QueryInt("offset", 0))
-	limit := uint(c.QueryInt("limit", 10))
-	result, err := ac.service.GetSelf(auth.UserId, offset, limit)
+	page := c.QueryInt("page", 1)
+	limit := c.QueryInt("limit", 10)
+	result, err := ac.service.GetSelf(auth.UserId, page, limit)
 	if err != nil {
 		return err
 	}

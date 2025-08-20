@@ -16,12 +16,12 @@ func NewAlamat(repo repository.Alamat) Alamat {
 	return Alamat{repo: repo}
 }
 
-func (as Alamat) GetSelf(userId, offset, limit uint) (
+func (as Alamat) GetSelf(userId uint, page, limit int) (
 	*struct{ Alamat []domain.Alamat }, error,
 ) {
 	result := new(struct{ Alamat []domain.Alamat })
 
-	daftarAlamat, err := as.repo.GetManyByUserId(userId, offset, limit)
+	daftarAlamat, err := as.repo.GetManyByUserId(userId, page, limit)
 	if err != nil {
 		return result, err
 	}

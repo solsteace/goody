@@ -2,11 +2,20 @@ package repository
 
 import "github.com/solsteace/goody/account/internal/domain"
 
+const alamatDefaultPageSize = 10
+
+func alamatOffset(page int, pageSize int) int {
+	if page < 1 {
+		return 0
+	}
+	return (page - 1) * pageSize
+}
+
 type Alamat interface {
 	GetById(id uint) (domain.Alamat, error)
 	Update(alamat domain.Alamat) error
 	Create(alamat domain.Alamat) (uint, error)
 	DeleteById(id uint) error
 
-	GetManyByUserId(userId, offset, limit uint) ([]domain.Alamat, error)
+	GetManyByUserId(userId uint, page, limit int) ([]domain.Alamat, error)
 }
