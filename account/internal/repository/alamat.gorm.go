@@ -59,10 +59,15 @@ func NewGormAlamat(db *gorm.DB) gormAlamat {
 	return gormAlamat{db: db}
 }
 
-func (ga gormAlamat) GetManyByUserId(userId uint, page, limit int) ([]domain.Alamat, error) {
+func (ga gormAlamat) GetManyByUserId(
+	id uint,
+	judul string,
+	page,
+	limit int,
+) ([]domain.Alamat, error) {
 	rows := new([]gormAlamatRow)
 	result := ga.db.
-		Where("id_user = ?", userId).
+		Where("id_user = ? AND judul_alamat LIKE ?", id, "%"+judul+"%").
 		Offset(alamatOffset(page, limit)).
 		Limit(limit).
 		Find(&rows)

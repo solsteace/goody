@@ -137,7 +137,6 @@ func (as Auth) Register(
 		return err
 	}
 
-	fmt.Println(as.onNewUser)
 	user.ID = userId
 	for _, fx := range as.onNewUser {
 		if err := fx(user); err != nil {

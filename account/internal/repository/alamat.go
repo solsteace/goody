@@ -17,5 +17,10 @@ type Alamat interface {
 	Create(alamat domain.Alamat) (uint, error)
 	DeleteById(id uint) error
 
-	GetManyByUserId(userId uint, page, limit int) ([]domain.Alamat, error)
+	GetManyByUserId(
+		userId uint,
+		judul string,
+		page,
+		limit int,
+	) ([]domain.Alamat, error)
 }

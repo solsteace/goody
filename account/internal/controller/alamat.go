@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -25,7 +26,9 @@ func (ac Alamat) GetSelf(c *fiber.Ctx) error {
 
 	page := c.QueryInt("page", 1)
 	limit := c.QueryInt("limit", 10)
-	result, err := ac.service.GetSelf(auth.UserId, page, limit)
+	judul := c.Query("judul_alamat", "")
+	fmt.Println(page, limit, judul)
+	result, err := ac.service.GetSelf(auth.UserId, judul, page, limit)
 	if err != nil {
 		return err
 	}
