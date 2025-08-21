@@ -20,6 +20,7 @@ import (
 	"github.com/solsteace/goody/account/internal/repository"
 	"github.com/solsteace/goody/account/internal/route"
 	"github.com/solsteace/goody/account/internal/service"
+	"github.com/solsteace/goody/lib/messaging/event"
 	"github.com/solsteace/goody/lib/token/payload"
 )
 
@@ -96,7 +97,7 @@ func RunApp() {
 
 	err = channel.QueueBind(
 		queue.Name,
-		"user.event.registered",
+		event.UserRegisteredName,
 		exchangeName,
 		false,
 		nil)
@@ -106,10 +107,8 @@ func RunApp() {
 	}
 
 	authService.SubscribeOnNewUser(func(u domain.User) error {
-		body, err := json.Marshal(struct {
-			IdUser uint   `json:"id_user"`
-			Nama   string `json:"nama"`
-		}{IdUser: u.ID, Nama: u.Nama})
+		payload := event.NewUserRegistered(u.ID, u.Nama)
+		body, err := json.Marshal(payload)
 		if err != nil {
 			return err
 		}
@@ -121,10 +120,10 @@ func RunApp() {
 		// A: https://www.cloudamqp.com/blog/part4-rabbitmq-for-beginners-exchanges-routing-keys-bindings.html#default-exchange
 		channel.PublishWithContext(
 			ctx,
-			exchangeName,            // exchange
-			"user.event.registered", // routing key
-			false,                   // mandatory
-			false,                   // immediate
+			exchangeName,             // exchange
+			event.UserRegisteredName, // routing key
+			false,                    // mandatory
+			false,                    // immediate
 			amqp091.Publishing{
 				ContentType: "application/json",
 				Body:        body,

@@ -15,6 +15,7 @@ import (
 	"github.com/solsteace/goody/catalog/internal/repository"
 	"github.com/solsteace/goody/catalog/internal/route"
 	"github.com/solsteace/goody/catalog/internal/service"
+	"github.com/solsteace/goody/lib/messaging/event"
 )
 
 func RunApp() {
@@ -91,7 +92,7 @@ func RunApp() {
 
 	err = channel.QueueBind(
 		queue.Name,
-		"user.event.registered",
+		event.UserRegisteredName,
 		exchangeName,
 		false,
 		nil)
@@ -113,10 +114,7 @@ func RunApp() {
 	}
 	go (func() {
 		for m := range msg {
-			payload := new(struct {
-				IdUser uint   `json:"id_user"`
-				Nama   string `json:"nama"`
-			})
+			payload := new(event.UserRegistered)
 			if err := json.Unmarshal(m.Body, payload); err != nil {
 				fmt.Printf("Warning! invalid message: %v \n", err)
 				m.Nack(false, false)
