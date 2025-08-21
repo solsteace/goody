@@ -57,6 +57,7 @@ func (as Alamat) CreateForSelf(
 	result := new(struct{ Alamat domain.Alamat })
 
 	alamat, err := domain.NewAlamat(
+		nil,
 		userId,
 		judulAlamat,
 		namaPenerima,

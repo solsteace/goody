@@ -22,6 +22,7 @@ type User struct {
 }
 
 func NewUser(
+	id *uint,
 	nama,
 	kataSandi,
 	noTelp string,
@@ -36,8 +37,14 @@ func NewUser(
 	updatedAt time.Time,
 	createdAt time.Time,
 ) (User, error) {
+	var userId uint = 0
+	if id != nil {
+		userId = *id
+	}
 	// TODO: domain validation...
+
 	user := User{
+		ID:           userId,
 		Nama:         nama,
 		KataSandi:    kataSandi,
 		NoTelp:       noTelp,
@@ -54,9 +61,4 @@ func NewUser(
 	}
 
 	return user, nil
-}
-
-func (u User) WithId(id uint) User {
-	u.ID = id
-	return u
 }

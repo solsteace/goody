@@ -115,6 +115,7 @@ func (as Auth) Register(
 
 	now := time.Now()
 	user, err := domain.NewUser(
+		nil,
 		nama,
 		string(passDigest),
 		noTelp,

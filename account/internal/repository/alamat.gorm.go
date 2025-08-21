@@ -25,7 +25,8 @@ func (row gormAlamatRow) TableName() string {
 }
 
 func (row gormAlamatRow) toAlamat() (domain.Alamat, error) {
-	alamat, err := domain.NewAlamat(
+	a, err := domain.NewAlamat(
+		&row.ID,
 		row.IdUser,
 		row.JudulAlamat,
 		row.NamaPenerima,
@@ -36,7 +37,7 @@ func (row gormAlamatRow) toAlamat() (domain.Alamat, error) {
 	if err != nil {
 		return domain.Alamat{}, err
 	}
-	return alamat.WithId(row.ID), nil
+	return a, nil
 }
 
 func newGormAlamatRow(alamat domain.Alamat) gormAlamatRow {

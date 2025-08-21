@@ -14,6 +14,7 @@ type Alamat struct {
 }
 
 func NewAlamat(
+	id *uint,
 	userId uint,
 	judulAlamat,
 	namaPenerima,
@@ -22,9 +23,15 @@ func NewAlamat(
 	createdAt time.Time,
 	updatedAt time.Time,
 ) (Alamat, error) {
+	var alamatId uint = 0
+	if id != nil {
+		alamatId = *id
+	}
+
 	// TODO: domain validation...
 
 	a := Alamat{
+		ID:           alamatId,
 		UserId:       userId,
 		JudulAlamat:  judulAlamat,
 		NamaPenerima: namaPenerima,
@@ -33,9 +40,4 @@ func NewAlamat(
 		CreatedAt:    createdAt,
 		UpdatedAt:    updatedAt}
 	return a, nil
-}
-
-func (a Alamat) WithId(id uint) Alamat {
-	a.ID = id
-	return a
 }

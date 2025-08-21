@@ -32,7 +32,8 @@ func (gu gormUserRow) TableName() string {
 }
 
 func (gu gormUserRow) toUser() (domain.User, error) {
-	user, err := domain.NewUser(
+	u, err := domain.NewUser(
+		&gu.ID,
 		gu.Nama,
 		gu.KataSandi,
 		gu.NoTelp,
@@ -50,7 +51,7 @@ func (gu gormUserRow) toUser() (domain.User, error) {
 		return domain.User{}, err
 	}
 
-	return user.WithId(gu.ID), nil
+	return u, nil
 }
 
 func newGormUserRow(user domain.User) gormUserRow {
