@@ -9,10 +9,10 @@ import (
 )
 
 type AuthToken struct {
-	tokenHandler token.Handler[payload.AuthPayload]
+	tokenHandler token.Handler[payload.Auth]
 }
 
-func NewAuthToken(handler token.Handler[payload.AuthPayload]) AuthToken {
+func NewAuthToken(handler token.Handler[payload.Auth]) AuthToken {
 	return AuthToken{tokenHandler: handler}
 }
 

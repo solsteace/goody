@@ -30,7 +30,7 @@ func RunApp() {
 	upSince := time.Now().Unix()
 	db := persistence.NewGorm(EnvDbUrl)
 	cryptor := crypto.NewBcrypt(10)
-	jwtAuth := token.NewJwt[payload.AuthPayload](
+	jwtAuth := token.NewJwt[payload.Auth](
 		EnvTokenIssuer,
 		EnvTokenSecret,
 		time.Duration(EnvTokenLifetime))

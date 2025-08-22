@@ -21,7 +21,7 @@ func NewUser(service *service.User, viewer view.User) User {
 }
 
 func (uc User) GetProfile(c *fiber.Ctx) error {
-	auth, ok := c.Locals("Authorization").(*payload.AuthPayload)
+	auth, ok := c.Locals("Authorization").(*payload.Auth)
 	if !ok {
 		return errors.New("Payload wasn't found on `Authorization` token")
 	}
@@ -54,7 +54,7 @@ func (uc User) UpdateProfile(c *fiber.Ctx) error {
 		return err
 	}
 
-	auth, ok := c.Locals("Authorization").(*payload.AuthPayload)
+	auth, ok := c.Locals("Authorization").(*payload.Auth)
 	if !ok {
 		return errors.New("Authorization payload wasn't found")
 	}
@@ -97,7 +97,7 @@ func (uc User) ChangeCredentials(c *fiber.Ctx) error {
 		return err
 	}
 
-	auth, ok := c.Locals("Authorization").(*payload.AuthPayload)
+	auth, ok := c.Locals("Authorization").(*payload.Auth)
 	if !ok {
 		return errors.New("Payload wasn't found on `Authorization` token")
 	}

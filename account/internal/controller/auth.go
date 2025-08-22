@@ -96,7 +96,7 @@ func (ac Auth) Register(c *fiber.Ctx) error {
 }
 
 func (ac Auth) Infer(c *fiber.Ctx) error {
-	auth, ok := c.Locals("Authorization").(*payload.AuthPayload)
+	auth, ok := c.Locals("Authorization").(*payload.Auth)
 	if !ok {
 		return errors.New("Valid payload wasn't found on token")
 	}

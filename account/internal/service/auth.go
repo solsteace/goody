@@ -16,7 +16,7 @@ import (
 type Auth struct {
 	userRepo     repository.User
 	cryptor      crypto.Cryptor
-	tokenHandler token.Handler[payload.AuthPayload]
+	tokenHandler token.Handler[payload.Auth]
 
 	onNewUser []func(u domain.User) error
 }
@@ -24,7 +24,7 @@ type Auth struct {
 func NewAuth(
 	userRepo repository.User,
 	cryptor crypto.Cryptor,
-	tokenHandler token.Handler[payload.AuthPayload],
+	tokenHandler token.Handler[payload.Auth],
 ) Auth {
 	return Auth{
 		userRepo:     userRepo,
