@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/solsteace/goody/account/internal/domain"
-	"github.com/solsteace/goody/account/internal/lib/api"
 	"github.com/solsteace/goody/account/internal/lib/crypto"
 	"github.com/solsteace/goody/account/internal/repository"
 )
@@ -12,51 +11,24 @@ import (
 type User struct {
 	userRepo repository.User
 	cryptor  crypto.Cryptor
-	indoApi  api.Emsifa
 }
 
-func NewUser(
-	userRepo repository.User,
-	cryptor crypto.Cryptor,
-	indoApi api.Emsifa,
-) User {
+func NewUser(userRepo repository.User, cryptor crypto.Cryptor) User {
 	return User{
 		userRepo: userRepo,
 		cryptor:  cryptor,
-		indoApi:  indoApi,
 	}
 }
 
-func (us User) GetProfile(userId uint) (
-	*struct {
-		User     domain.User
-		Provinsi <-chan map[string]any
-		Kota     <-chan map[string]any
-	},
-	error,
-) {
-	result := new(struct {
-		User     domain.User
-		Provinsi <-chan map[string]any
-		Kota     <-chan map[string]any
-	})
+func (us User) GetProfile(userId uint) (*struct{ User domain.User }, error) {
+	result := new(struct{ User domain.User })
 
 	user, err := us.userRepo.GetById(userId)
 	if err != nil {
 		return result, err
 	}
 
-	provinsi := make(chan map[string]any, 1)
-	kota := make(chan map[string]any, 1)
-	us.indoApi.GetProvinceAndRegencyById(
-		user.IdProvinsi,
-		user.IdKota,
-		provinsi,
-		kota)
-
 	result.User = user
-	result.Provinsi = provinsi
-	result.Kota = kota
 	return result, nil
 }
 
@@ -67,19 +39,8 @@ func (us User) UpdateProfile(
 	pekerjaan,
 	idProvinsi,
 	idKota string,
-) (
-	*struct {
-		User     domain.User
-		Provinsi <-chan map[string]any
-		Kota     <-chan map[string]any
-	},
-	error,
-) {
-	result := new(struct {
-		User     domain.User
-		Provinsi <-chan map[string]any
-		Kota     <-chan map[string]any
-	})
+) (*struct{ User domain.User }, error) {
+	result := new(struct{ User domain.User })
 
 	user, err := us.userRepo.GetById(userId)
 	if err != nil {
@@ -96,17 +57,7 @@ func (us User) UpdateProfile(
 		return result, err
 	}
 
-	provinsi := make(chan map[string]any, 1)
-	kota := make(chan map[string]any, 1)
-	us.indoApi.GetProvinceAndRegencyById(
-		user.IdProvinsi,
-		user.IdKota,
-		provinsi,
-		kota)
-
 	result.User = user
-	result.Provinsi = provinsi
-	result.Kota = kota
 	return result, nil
 }
 
@@ -116,19 +67,8 @@ func (us User) ChangeCredentials(
 	email string,
 	sandiLama,
 	sandiBaru string,
-) (
-	*struct {
-		User     domain.User
-		Provinsi <-chan map[string]any
-		Kota     <-chan map[string]any
-	},
-	error,
-) {
-	result := new(struct {
-		User     domain.User
-		Provinsi <-chan map[string]any
-		Kota     <-chan map[string]any
-	})
+) (*struct{ User domain.User }, error) {
+	result := new(struct{ User domain.User })
 
 	user, err := us.userRepo.GetById(userId)
 	if err != nil {
@@ -153,16 +93,6 @@ func (us User) ChangeCredentials(
 		return result, err
 	}
 
-	provinsi := make(chan map[string]any, 1)
-	kota := make(chan map[string]any, 1)
-	us.indoApi.GetProvinceAndRegencyById(
-		user.IdProvinsi,
-		user.IdKota,
-		provinsi,
-		kota)
-
 	result.User = user
-	result.Provinsi = provinsi
-	result.Kota = kota
 	return result, nil
 }

@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
-	"github.com/gofiber/fiber/v2/log"
 )
 
 // @ref https://github.com/Emsifa/api-wilayah-indonesia
@@ -19,8 +17,7 @@ func NewEmsifa(endpoint string) Emsifa {
 }
 
 // Mengambil Data Provinsi berdasarkan ID Provinsi
-//
-// @ref https://github.com/emsifa/api-wilayah-indonesia?tab=readme-ov-file#5-mengambil-data-provinsi-berdasarkan-id-provinsi
+// (https://github.com/emsifa/api-wilayah-indonesia?tab=readme-ov-file#5-mengambil-data-provinsi-berdasarkan-id-provinsi)
 func (api Emsifa) GetProvinceById(provinceId string) (map[string]any, error) {
 	url := fmt.Sprintf("%s/province/%s.json", api.endpoint, provinceId)
 	res, err := http.Get(url)
@@ -51,8 +48,7 @@ func (api Emsifa) GetProvinceById(provinceId string) (map[string]any, error) {
 }
 
 // Mengambil Data Kab/Kota berdasarkan ID Kab/Kota
-//
-// @ref https://github.com/emsifa/api-wilayah-indonesia?tab=readme-ov-file#6-mengambil-data-kabkota-berdasarkan-id-kabkota
+// (https://github.com/emsifa/api-wilayah-indonesia?tab=readme-ov-file#6-mengambil-data-kabkota-berdasarkan-id-kabkota)
 func (api Emsifa) GetRegencyById(regencyId string) (map[string]any, error) {
 	url := fmt.Sprintf("%s/regency/%s.json", api.endpoint, regencyId)
 	res, err := http.Get(url)
@@ -89,16 +85,15 @@ func (api Emsifa) GetProvinceAndRegencyById(
 	go func() {
 		province, err := api.GetProvinceById(provinceId)
 		if err != nil {
-			log.Warnf("Failed to fetch province info: %v", err)
+			fmt.Printf("Failed to fetch province info: %v", err)
 		}
 		provinceChan <- province
 	}()
 	go func() {
 		regency, err := api.GetRegencyById(regencyId)
 		if err != nil {
-			log.Warnf("Failed to fetch province info: %v", err)
+			fmt.Printf("Failed to fetch province info: %v", err)
 		}
 		regencyChan <- regency
 	}()
-
 }

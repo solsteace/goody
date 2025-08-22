@@ -17,6 +17,7 @@ import (
 	"github.com/solsteace/goody/account/internal/lib/middleware"
 	"github.com/solsteace/goody/account/internal/lib/persistence"
 	"github.com/solsteace/goody/account/internal/lib/token"
+	"github.com/solsteace/goody/account/internal/lib/view/rakamin"
 	"github.com/solsteace/goody/account/internal/repository"
 	"github.com/solsteace/goody/account/internal/route"
 	"github.com/solsteace/goody/account/internal/service"
@@ -35,16 +36,17 @@ func RunApp() {
 		time.Duration(EnvTokenLifetime))
 	indoApi := api.NewEmsifa(EnvIndoApiEndpoint)
 	authToken := middleware.NewAuthToken(jwtAuth)
+	viewer := rakamin.NewViewer(indoApi)
 
 	// Layers...
 	alamatRepo := repository.NewGormAlamat(db)
 	userRepo := repository.NewGormUser(db)
-	authService := service.NewAuth(userRepo, cryptor, indoApi, jwtAuth)
+	authService := service.NewAuth(userRepo, cryptor, jwtAuth)
 	alamatService := service.NewAlamat(alamatRepo)
-	userService := service.NewUser(userRepo, cryptor, indoApi)
-	authController := controller.NewAuth(&authService)
-	alamatController := controller.NewAlamat(&alamatService)
-	userController := controller.NewUser(&userService)
+	userService := service.NewUser(userRepo, cryptor)
+	authController := controller.NewAuth(&authService, viewer)
+	alamatController := controller.NewAlamat(&alamatService, viewer)
+	userController := controller.NewUser(&userService, viewer)
 
 	// Routings...
 	app := fiber.New()

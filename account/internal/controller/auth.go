@@ -7,16 +7,18 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/solsteace/goody/account/internal/lib/view"
 	"github.com/solsteace/goody/account/internal/service"
 	"github.com/solsteace/goody/lib/token/payload"
 )
 
 type Auth struct {
 	service *service.Auth
+	viewer  view.Auth
 }
 
-func NewAuth(service *service.Auth) Auth {
-	return Auth{service: service}
+func NewAuth(service *service.Auth, viewer view.Auth) Auth {
+	return Auth{viewer: viewer, service: service}
 }
 
 func (ac Auth) Login(c *fiber.Ctx) error {
@@ -33,23 +35,14 @@ func (ac Auth) Login(c *fiber.Ctx) error {
 		return c.SendString(err.Error())
 	}
 
-	resData := map[string]any{
-		"nama":          result.User.Nama,
-		"no_telp":       result.User.NoTelp,
-		"tanggal_lahir": result.User.TanggalLahir,
-		"tentang":       result.User.Tentang,
-		"pekerjaan":     result.User.Pekerjaan,
-		"email":         result.User.Email,
-		"id_provinsi":   <-result.Provinsi,
-		"id_kota":       <-result.Kota,
-		"token":         result.AccessToken}
 	return c.
 		Status(http.StatusOK).
 		JSON(fiber.Map{
 			"status":  true,
 			"message": "Succeed to POST data",
 			"errors":  nil,
-			"data":    resData,
+			"data": ac.viewer.Login(
+				result.User, result.AccessToken, result.RefreshToken),
 		})
 }
 
@@ -94,7 +87,12 @@ func (ac Auth) Register(c *fiber.Ctx) error {
 
 	return c.
 		Status(http.StatusCreated).
-		SendString("Register Succeed")
+		JSON(fiber.Map{
+			"status":  true,
+			"message": "Succeed to POST data",
+			"errors":  nil,
+			"data":    "Register Succeed",
+		})
 }
 
 func (ac Auth) Infer(c *fiber.Ctx) error {

@@ -2,20 +2,24 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/solsteace/goody/account/internal/lib/view"
 	"github.com/solsteace/goody/account/internal/service"
 	"github.com/solsteace/goody/lib/token/payload"
 )
 
 type Alamat struct {
 	service *service.Alamat
+	viewer  view.Alamat
 }
 
-func NewAlamat(service *service.Alamat) Alamat {
-	return Alamat{service: service}
+func NewAlamat(
+	service *service.Alamat,
+	viewer view.Alamat,
+) Alamat {
+	return Alamat{service: service, viewer: viewer}
 }
 
 func (ac Alamat) GetSelf(c *fiber.Ctx) error {
@@ -27,36 +31,12 @@ func (ac Alamat) GetSelf(c *fiber.Ctx) error {
 	page := c.QueryInt("page", 1)
 	limit := c.QueryInt("limit", 10)
 	judul := c.Query("judul_alamat", "")
-	fmt.Println(page, limit, judul)
 	result, err := ac.service.GetSelf(auth.UserId, judul, page, limit)
 	if err != nil {
 		return err
 	}
 
-	resPayload := []struct {
-		Id           uint   `json:"id"`
-		JudulAlamat  string `json:"judul_alamat"`
-		NamaPenerima string `json:"nama_penerima"`
-		NoTelp       string `json:"no_telp" `
-		DetailAlamat string `json:"detail_alamat"`
-	}{}
-	for _, a := range result.Alamat {
-		p := struct {
-			Id           uint   `json:"id"`
-			JudulAlamat  string `json:"judul_alamat"`
-			NamaPenerima string `json:"nama_penerima"`
-			NoTelp       string `json:"no_telp" `
-			DetailAlamat string `json:"detail_alamat"`
-		}{
-			Id:           a.ID,
-			JudulAlamat:  a.JudulAlamat,
-			NamaPenerima: a.NamaPenerima,
-			NoTelp:       a.NoTelp,
-			DetailAlamat: a.DetailAlamat,
-		}
-		resPayload = append(resPayload, p)
-	}
-
+	resPayload := ac.viewer.ManyAlamat(result.Alamat)
 	return c.
 		Status(http.StatusOK).
 		JSON(fiber.Map{

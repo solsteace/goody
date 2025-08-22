@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/solsteace/goody/account/internal/domain"
-	"github.com/solsteace/goody/account/internal/lib/api"
 	"github.com/solsteace/goody/account/internal/lib/crypto"
 	"github.com/solsteace/goody/account/internal/repository"
 	appError "github.com/solsteace/goody/lib/errors"
@@ -17,7 +16,6 @@ import (
 type Auth struct {
 	userRepo     repository.User
 	cryptor      crypto.Cryptor
-	indoApi      api.Emsifa
 	tokenHandler token.Handler[payload.AuthPayload]
 
 	onNewUser []func(u domain.User) error
@@ -26,13 +24,11 @@ type Auth struct {
 func NewAuth(
 	userRepo repository.User,
 	cryptor crypto.Cryptor,
-	indoApi api.Emsifa,
 	tokenHandler token.Handler[payload.AuthPayload],
 ) Auth {
 	return Auth{
 		userRepo:     userRepo,
 		cryptor:      cryptor,
-		indoApi:      indoApi,
 		tokenHandler: tokenHandler}
 }
 
@@ -44,8 +40,6 @@ func (as *Auth) SubscribeOnNewUser(fx func(u domain.User) error) {
 func (as Auth) Login(noTelp, kataSandi string) (
 	*struct {
 		User         domain.User
-		Provinsi     <-chan map[string]any
-		Kota         <-chan map[string]any
 		AccessToken  string
 		RefreshToken string
 	},
@@ -53,8 +47,6 @@ func (as Auth) Login(noTelp, kataSandi string) (
 ) {
 	result := new(struct {
 		User         domain.User
-		Provinsi     <-chan map[string]any
-		Kota         <-chan map[string]any
 		AccessToken  string
 		RefreshToken string
 	})
@@ -69,10 +61,6 @@ func (as Auth) Login(noTelp, kataSandi string) (
 		return result, errors.New("Password and phone number doesn't match")
 	}
 
-	provinsi := make(chan map[string]any, 1)
-	kota := make(chan map[string]any, 1)
-	as.indoApi.GetProvinceAndRegencyById(user.IdProvinsi, user.IdKota, provinsi, kota)
-
 	accessToken, err := as.tokenHandler.Encode(payload.NewAuth(user.ID, user.IsAdmin))
 	if err != nil {
 		return result, err
@@ -80,8 +68,6 @@ func (as Auth) Login(noTelp, kataSandi string) (
 
 	result.User = user
 	result.AccessToken = accessToken
-	result.Provinsi = provinsi
-	result.Kota = kota
 	return result, nil
 }
 

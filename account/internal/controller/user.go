@@ -6,16 +6,18 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/solsteace/goody/account/internal/lib/view"
 	"github.com/solsteace/goody/account/internal/service"
 	"github.com/solsteace/goody/lib/token/payload"
 )
 
 type User struct {
+	viewer  view.User
 	service *service.User
 }
 
-func NewUser(service *service.User) User {
-	return User{service: service}
+func NewUser(service *service.User, viewer view.User) User {
+	return User{viewer: viewer, service: service}
 }
 
 func (uc User) GetProfile(c *fiber.Ctx) error {
@@ -29,22 +31,15 @@ func (uc User) GetProfile(c *fiber.Ctx) error {
 		return err
 	}
 
-	resPayload := map[string]any{
-		"nama":          result.User.Nama,
-		"no_telp":       result.User.NoTelp,
-		"tanggal_lahir": result.User.TanggalLahir,
-		"tentang":       result.User.Tentang,
-		"pekerjaan":     result.User.Pekerjaan,
-		"email":         result.User.Email,
-		"id_provinsi":   <-result.Provinsi,
-		"id_kota":       <-result.Kota}
 	return c.
 		Status(http.StatusOK).
 		JSON(fiber.Map{
 			"status":  true,
 			"message": "Succeed to POST data",
 			"errors":  nil,
-			"data":    resPayload})
+			"data": fiber.Map{
+				"user": uc.viewer.User(result.User),
+			}})
 }
 
 func (uc User) UpdateProfile(c *fiber.Ctx) error {
@@ -80,22 +75,15 @@ func (uc User) UpdateProfile(c *fiber.Ctx) error {
 		return err
 	}
 
-	resPayload := map[string]any{
-		"nama":          result.User.Nama,
-		"no_telp":       result.User.NoTelp,
-		"tanggal_lahir": result.User.TanggalLahir,
-		"tentang":       result.User.Tentang,
-		"pekerjaan":     result.User.Pekerjaan,
-		"email":         result.User.Email,
-		"id_provinsi":   <-result.Provinsi,
-		"id_kota":       <-result.Kota}
 	return c.
 		Status(http.StatusOK).
 		JSON(fiber.Map{
 			"status":  true,
 			"message": "Succeed to POST data",
 			"errors":  nil,
-			"data":    resPayload})
+			"data": fiber.Map{
+				"user": uc.viewer.User(result.User),
+			}})
 }
 
 func (uc User) ChangeCredentials(c *fiber.Ctx) error {
@@ -124,20 +112,13 @@ func (uc User) ChangeCredentials(c *fiber.Ctx) error {
 		return err
 	}
 
-	resPayload := map[string]any{
-		"nama":          result.User.Nama,
-		"no_telp":       result.User.NoTelp,
-		"tanggal_lahir": result.User.TanggalLahir,
-		"tentang":       result.User.Tentang,
-		"pekerjaan":     result.User.Pekerjaan,
-		"email":         result.User.Email,
-		"id_provinsi":   <-result.Provinsi,
-		"id_kota":       <-result.Kota}
 	return c.
 		Status(http.StatusOK).
 		JSON(fiber.Map{
 			"status":  true,
 			"message": "Succeed to POST data",
 			"errors":  nil,
-			"data":    resPayload})
+			"data": fiber.Map{
+				"user": uc.viewer.User(result.User),
+			}})
 }
