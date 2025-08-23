@@ -1,14 +1,12 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/solsteace/goody/account/internal/domain"
 	"github.com/solsteace/goody/account/internal/lib/crypto"
 	"github.com/solsteace/goody/account/internal/repository"
-	"github.com/solsteace/goody/lib/oops"
 	"github.com/solsteace/goody/lib/token"
 	"github.com/solsteace/goody/lib/token/payload"
 )
@@ -84,17 +82,6 @@ func (as Auth) Register(
 	idProvinsi,
 	idKota string,
 ) error {
-	existingUser, err := as.userRepo.GetByPhoneNumber(noTelp)
-	if err != nil && !errors.As(err, &oops.NotFound{}) {
-		return err
-	}
-	if existingUser.ID != 0 {
-		return oops.BadValues{
-			Err: errors.New("This phone number is already used"),
-			Msg: "Nomor telepon yang diberikan sudah digunakan user lain",
-		}
-	}
-
 	passDigest, err := as.cryptor.Generate(kataSandi)
 	if err != nil {
 		return err
