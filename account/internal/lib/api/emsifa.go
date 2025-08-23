@@ -32,18 +32,16 @@ func (api Emsifa) GetProvinceById(provinceId string) (map[string]any, error) {
 	}
 
 	payload := new(struct {
-		Id         string `json:"id"`
-		ProvinceId string `json:"province_id"`
-		Name       string `json:"name"`
+		Id   string `json:"id"`
+		Name string `json:"name"`
 	})
 	if err := json.Unmarshal(data, &payload); err != nil {
 		return map[string]any{}, err
 	}
 
 	province := map[string]any{
-		"id":          payload.Id,
-		"province_id": payload.ProvinceId,
-		"name":        payload.Name}
+		"id":   payload.Id,
+		"name": payload.Name}
 	return province, nil
 }
 
@@ -63,16 +61,18 @@ func (api Emsifa) GetRegencyById(regencyId string) (map[string]any, error) {
 	}
 
 	payload := new(struct {
-		Id   string `json:"id"`
-		Name string `json:"name"`
+		Id         string `json:"id"`
+		ProvinceId string `json:"province_id"`
+		Name       string `json:"name"`
 	})
 	if err := json.Unmarshal(data, &payload); err != nil {
 		return map[string]any{}, err
 	}
 
 	province := map[string]any{
-		"id":   payload.Id,
-		"name": payload.Name}
+		"id":          payload.Id,
+		"province_id": payload.ProvinceId,
+		"name":        payload.Name}
 	return province, nil
 }
 
