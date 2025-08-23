@@ -8,14 +8,13 @@ import (
 	"github.com/solsteace/goody/lib/oops"
 	"github.com/solsteace/goody/lib/oops/adapter"
 	"github.com/solsteace/goody/lib/token"
-	"github.com/solsteace/goody/lib/token/payload"
 )
 
 type AuthToken struct {
-	tokenHandler token.Handler[payload.Auth]
+	tokenHandler token.Handler[token.Auth]
 }
 
-func NewAuthToken(handler token.Handler[payload.Auth]) AuthToken {
+func NewAuthToken(handler token.Handler[token.Auth]) AuthToken {
 	return AuthToken{tokenHandler: handler}
 }
 
@@ -30,13 +29,19 @@ func (a AuthToken) Handle(c *fiber.Ctx) error {
 			JSON(fiber.Map{
 				"status":  false,
 				"message": fmt.Sprintf("Failed to %s data", c.Method()),
-				"errors":  []error{err},
+				"errors":  []string{err.Error()},
 				"data":    ""})
 	}
 
 	payload, err := a.tokenHandler.Decode(token)
 	if err != nil {
-		return err
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	c.Locals("Authorization", payload)

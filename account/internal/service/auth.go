@@ -8,13 +8,12 @@ import (
 	"github.com/solsteace/goody/account/internal/lib/crypto"
 	"github.com/solsteace/goody/account/internal/repository"
 	"github.com/solsteace/goody/lib/token"
-	"github.com/solsteace/goody/lib/token/payload"
 )
 
 type Auth struct {
 	userRepo     repository.User
 	cryptor      crypto.Cryptor
-	tokenHandler token.Handler[payload.Auth]
+	tokenHandler token.Handler[token.Auth]
 
 	onNewUser []func(u domain.User) error
 }
@@ -22,7 +21,7 @@ type Auth struct {
 func NewAuth(
 	userRepo repository.User,
 	cryptor crypto.Cryptor,
-	tokenHandler token.Handler[payload.Auth],
+	tokenHandler token.Handler[token.Auth],
 ) Auth {
 	return Auth{
 		userRepo:     userRepo,
@@ -59,7 +58,7 @@ func (as Auth) Login(noTelp, kataSandi string) (
 		return result, err
 	}
 
-	accessToken, err := as.tokenHandler.Encode(payload.NewAuth(user.ID, user.IsAdmin))
+	accessToken, err := as.tokenHandler.Encode(token.NewAuth(user.ID, user.IsAdmin))
 	if err != nil {
 		return result, err
 	}

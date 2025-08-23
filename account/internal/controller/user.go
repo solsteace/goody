@@ -11,7 +11,7 @@ import (
 	"github.com/solsteace/goody/account/internal/service"
 	"github.com/solsteace/goody/lib/oops"
 	"github.com/solsteace/goody/lib/oops/adapter"
-	"github.com/solsteace/goody/lib/token/payload"
+	"github.com/solsteace/goody/lib/token"
 )
 
 type User struct {
@@ -24,7 +24,7 @@ func NewUser(service *service.User, viewer view.User) User {
 }
 
 func (uc User) GetProfile(c *fiber.Ctx) error {
-	auth, ok := c.Locals("Authorization").(*payload.Auth)
+	auth, ok := c.Locals("Authorization").(*token.Auth)
 	if !ok {
 		err := oops.Unauthorized{
 			Err: errors.New("Payload wasn't found on `Authorization` token"),
@@ -78,7 +78,7 @@ func (uc User) UpdateProfile(c *fiber.Ctx) error {
 				"data":    ""})
 	}
 
-	auth, ok := c.Locals("Authorization").(*payload.Auth)
+	auth, ok := c.Locals("Authorization").(*token.Auth)
 	if !ok {
 		err := oops.Unauthorized{
 			Err: errors.New("Payload wasn't found on `Authorization` token"),
@@ -148,7 +148,7 @@ func (uc User) ChangeCredentials(c *fiber.Ctx) error {
 				"data":    ""})
 	}
 
-	auth, ok := c.Locals("Authorization").(*payload.Auth)
+	auth, ok := c.Locals("Authorization").(*token.Auth)
 	if !ok {
 		err := oops.Unauthorized{
 			Err: errors.New("Payload wasn't found on `Authorization` token"),

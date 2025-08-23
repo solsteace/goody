@@ -10,7 +10,7 @@ import (
 	"github.com/solsteace/goody/account/internal/service"
 	"github.com/solsteace/goody/lib/oops"
 	"github.com/solsteace/goody/lib/oops/adapter"
-	"github.com/solsteace/goody/lib/token/payload"
+	"github.com/solsteace/goody/lib/token"
 )
 
 type Alamat struct {
@@ -26,7 +26,7 @@ func NewAlamat(
 }
 
 func (ac Alamat) GetSelf(c *fiber.Ctx) error {
-	auth, ok := c.Locals("Authorization").(*payload.Auth)
+	auth, ok := c.Locals("Authorization").(*token.Auth)
 	if !ok {
 		err := oops.Unauthorized{
 			Err: errors.New("Payload wasn't found on `Authorization` token"),
@@ -58,7 +58,7 @@ func (ac Alamat) GetSelf(c *fiber.Ctx) error {
 }
 
 func (ac Alamat) GetById(c *fiber.Ctx) error {
-	auth, ok := c.Locals("Authorization").(*payload.Auth)
+	auth, ok := c.Locals("Authorization").(*token.Auth)
 	if !ok {
 		err := oops.Unauthorized{
 			Err: errors.New("Payload wasn't found on `Authorization` token"),
@@ -108,7 +108,7 @@ func (ac Alamat) CreateForSelf(c *fiber.Ctx) error {
 				"data":    ""})
 	}
 
-	auth, ok := c.Locals("Authorization").(*payload.Auth)
+	auth, ok := c.Locals("Authorization").(*token.Auth)
 	if !ok {
 		err := oops.Unauthorized{
 			Err: errors.New("Payload wasn't found on `Authorization` token"),
@@ -153,7 +153,7 @@ func (ac Alamat) UpdateById(c *fiber.Ctx) error {
 		return err
 	}
 
-	auth, ok := c.Locals("Authorization").(*payload.Auth)
+	auth, ok := c.Locals("Authorization").(*token.Auth)
 	if !ok {
 		err := oops.Unauthorized{
 			Err: errors.New("Payload wasn't found on `Authorization` token"),
@@ -205,7 +205,7 @@ func (ac Alamat) UpdateById(c *fiber.Ctx) error {
 }
 
 func (ac Alamat) DeleteById(c *fiber.Ctx) error {
-	auth, ok := c.Locals("Authorization").(*payload.Auth)
+	auth, ok := c.Locals("Authorization").(*token.Auth)
 	if !ok {
 		err := oops.Unauthorized{
 			Err: errors.New("Payload wasn't found on `Authorization` token"),

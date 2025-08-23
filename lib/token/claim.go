@@ -1,4 +1,4 @@
-package payload
+package token
 
 type Auth struct {
 	UserId  uint `json:"UserId"`

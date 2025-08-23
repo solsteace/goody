@@ -22,7 +22,7 @@ import (
 	"github.com/solsteace/goody/account/internal/route"
 	"github.com/solsteace/goody/account/internal/service"
 	"github.com/solsteace/goody/lib/messaging/event"
-	"github.com/solsteace/goody/lib/token/payload"
+	goodyToken "github.com/solsteace/goody/lib/token"
 )
 
 func RunApp() {
@@ -30,7 +30,7 @@ func RunApp() {
 	upSince := time.Now().Unix()
 	db := persistence.NewGorm(EnvDbUrl)
 	cryptor := crypto.NewBcrypt(10)
-	jwtAuth := token.NewJwt[payload.Auth](
+	jwtAuth := token.NewJwt[goodyToken.Auth](
 		EnvTokenIssuer,
 		EnvTokenSecret,
 		time.Duration(EnvTokenLifetime))
