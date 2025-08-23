@@ -9,7 +9,6 @@ import (
 	"github.com/solsteace/goody/account/internal/lib/view"
 	"github.com/solsteace/goody/account/internal/service"
 	"github.com/solsteace/goody/lib/oops"
-	"github.com/solsteace/goody/lib/oops/adapter"
 	"github.com/solsteace/goody/lib/payload"
 	"github.com/solsteace/goody/lib/token"
 )
@@ -31,19 +30,14 @@ func NewUser(
 func (uc User) GetProfile(c *fiber.Ctx) error {
 	auth, ok := c.Locals("Authorization").(*token.Auth)
 	if !ok {
-		err := oops.Unauthorized{
+		return oops.Unauthorized{
 			Err: errors.New("Payload wasn't found on `Authorization` token"),
 			Msg: "Tidak ditemukan payload yang sesuai pada token"}
-		return c.
-			Status(adapter.HttpStatusCode(err)).
-			JSON(uc.payloader.Err(c.Method(), []error{err}))
 	}
 
 	result, err := uc.service.GetProfile(auth.UserId)
 	if err != nil {
-		return c.
-			Status(adapter.HttpStatusCode(err)).
-			JSON(uc.payloader.Err(c.Method(), []error{err}))
+		return err
 	}
 
 	resPayload := uc.userView.User(result.User)
@@ -61,26 +55,19 @@ func (uc User) UpdateProfile(c *fiber.Ctx) error {
 		IdKota       string `json:"id_kota"`
 	})
 	if err := c.BodyParser(reqPayload); err != nil {
-		return c.
-			Status(adapter.HttpStatusCode(err)).
-			JSON(uc.payloader.Err(c.Method(), []error{err}))
+		return err
 	}
 
 	auth, ok := c.Locals("Authorization").(*token.Auth)
 	if !ok {
-		err := oops.Unauthorized{
+		return oops.Unauthorized{
 			Err: errors.New("Payload wasn't found on `Authorization` token"),
 			Msg: "Tidak ditemukan payload yang sesuai pada token"}
-		return c.
-			Status(adapter.HttpStatusCode(err)).
-			JSON(uc.payloader.Err(c.Method(), []error{err}))
 	}
 
 	tanggalLahir, err := time.Parse("02/01/2006", reqPayload.TanggalLahir)
 	if err != nil {
-		return c.
-			Status(adapter.HttpStatusCode(err)).
-			JSON(uc.payloader.Err(c.Method(), []error{err}))
+		return err
 	}
 
 	result, err := uc.service.UpdateProfile(
@@ -91,9 +78,7 @@ func (uc User) UpdateProfile(c *fiber.Ctx) error {
 		reqPayload.IdProvinsi,
 		reqPayload.IdKota)
 	if err != nil {
-		return c.
-			Status(adapter.HttpStatusCode(err)).
-			JSON(uc.payloader.Err(c.Method(), []error{err}))
+		return err
 	}
 
 	resPayload := uc.userView.User(result.User)
@@ -110,19 +95,14 @@ func (uc User) ChangeCredentials(c *fiber.Ctx) error {
 		KataSandiBaru string `json:"kata_sandi_baru"`
 	})
 	if err := c.BodyParser(reqPayload); err != nil {
-		return c.
-			Status(adapter.HttpStatusCode(err)).
-			JSON(uc.payloader.Err(c.Method(), []error{err}))
+		return err
 	}
 
 	auth, ok := c.Locals("Authorization").(*token.Auth)
 	if !ok {
-		err := oops.Unauthorized{
+		return oops.Unauthorized{
 			Err: errors.New("Payload wasn't found on `Authorization` token"),
 			Msg: "Tidak ditemukan payload yang sesuai pada token"}
-		return c.
-			Status(adapter.HttpStatusCode(err)).
-			JSON(uc.payloader.Err(c.Method(), []error{err}))
 	}
 
 	result, err := uc.service.ChangeCredentials(
@@ -132,9 +112,7 @@ func (uc User) ChangeCredentials(c *fiber.Ctx) error {
 		reqPayload.KataSandiLama,
 		reqPayload.KataSandiBaru)
 	if err != nil {
-		return c.
-			Status(adapter.HttpStatusCode(err)).
-			JSON(uc.payloader.Err(c.Method(), []error{err}))
+		return err
 	}
 
 	resPayload := uc.userView.User(result.User)

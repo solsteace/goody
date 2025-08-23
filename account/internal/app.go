@@ -36,11 +36,14 @@ func RunApp() {
 		EnvTokenSecret,
 		time.Duration(EnvTokenLifetime))
 	indoApi := api.NewEmsifa(EnvIndoApiEndpoint)
-	authToken := middleware.NewAuthToken(jwtAuth)
 	payloader := payload.Rakamin{}
 	viewer := view.NewRakamin(indoApi)
+	authToken := middleware.NewAuthToken(jwtAuth)
+	errorHandler := middleware.NewErrorHandler(payloader)
 
+	// ========================================
 	// Layers...
+	// ========================================
 	alamatRepo := repository.NewGormAlamat(db)
 	userRepo := repository.NewGormUser(db)
 	authService := service.NewAuth(userRepo, cryptor, jwtAuth)
@@ -50,8 +53,12 @@ func RunApp() {
 	alamatController := controller.NewAlamat(&alamatService, viewer, payloader)
 	userController := controller.NewUser(&userService, viewer, payloader)
 
+	// ========================================
 	// Routings...
-	app := fiber.New()
+	// ========================================
+	app := fiber.New(fiber.Config{
+		ErrorHandler: errorHandler.Handle,
+	})
 	app.Use(logger.New())
 	api := app.Group("/api")
 	route.UseAuth(&api, &authController, authToken)
@@ -61,8 +68,10 @@ func RunApp() {
 		return c.SendString(fmt.Sprintf("%d", upTime))
 	})
 
+	// ========================================
 	// Subscriptions, side-effects...
 	// TODO: Refactor and add auto-reconnection
+	// ========================================
 	mqConn, err := amqp091.Dial(EnvMqUrl)
 	if err != nil {
 		log.Fatalf("Couldn't connection to MQ: %v", err)

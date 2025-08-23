@@ -35,16 +35,12 @@ func (ac Auth) Login(c *fiber.Ctx) error {
 		NoTelp    string `json:"no_telp"`
 	})
 	if err := c.BodyParser(reqPayload); err != nil {
-		return c.
-			Status(adapter.HttpStatusCode(err)).
-			JSON(ac.payloader.Err(c.Method(), []error{err}))
+		return err
 	}
 
 	result, err := ac.service.Login(reqPayload.NoTelp, reqPayload.KataSandi)
 	if err != nil {
-		return c.
-			Status(adapter.HttpStatusCode(err)).
-			JSON(ac.payloader.Err(c.Method(), []error{err}))
+		return err
 	}
 
 	resPayload := ac.authView.Login(result.User, result.AccessToken, result.RefreshToken)
@@ -68,16 +64,12 @@ func (ac Auth) Register(c *fiber.Ctx) error {
 		IdKota       string `json:"id_kota"`
 	})
 	if err := c.BodyParser(reqPayload); err != nil {
-		return c.
-			Status(adapter.HttpStatusCode(err)).
-			JSON(ac.payloader.Err(c.Method(), []error{err}))
+		return err
 	}
 
 	tanggalLahir, err := time.Parse("02/01/2006", reqPayload.TanggalLahir)
 	if err != nil {
-		return c.
-			Status(adapter.HttpStatusCode(err)).
-			JSON(ac.payloader.Err(c.Method(), []error{err}))
+		return err
 	}
 
 	err = ac.service.Register(
@@ -93,9 +85,7 @@ func (ac Auth) Register(c *fiber.Ctx) error {
 		reqPayload.IdProvinsi,
 		reqPayload.IdKota)
 	if err != nil {
-		return c.
-			Status(adapter.HttpStatusCode(err)).
-			JSON(ac.payloader.Err(c.Method(), []error{err}))
+		return err
 	}
 
 	resPayload := "Register Succeed"
