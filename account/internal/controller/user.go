@@ -17,13 +17,13 @@ import (
 type User struct {
 	service   *service.User
 	userView  view.User
-	payloader payload.Viewer
+	payloader payload.Loader
 }
 
 func NewUser(
 	service *service.User,
 	viewer view.User,
-	payloader payload.Viewer,
+	payloader payload.Loader,
 ) User {
 	return User{service, viewer, payloader}
 }

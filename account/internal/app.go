@@ -17,7 +17,7 @@ import (
 	"github.com/solsteace/goody/account/internal/lib/middleware"
 	"github.com/solsteace/goody/account/internal/lib/persistence"
 	"github.com/solsteace/goody/account/internal/lib/token"
-	"github.com/solsteace/goody/account/internal/lib/view/rakamin"
+	"github.com/solsteace/goody/account/internal/lib/view"
 	"github.com/solsteace/goody/account/internal/repository"
 	"github.com/solsteace/goody/account/internal/route"
 	"github.com/solsteace/goody/account/internal/service"
@@ -38,7 +38,7 @@ func RunApp() {
 	indoApi := api.NewEmsifa(EnvIndoApiEndpoint)
 	authToken := middleware.NewAuthToken(jwtAuth)
 	payloader := payload.Rakamin{}
-	viewer := rakamin.NewViewer(indoApi)
+	viewer := view.NewRakamin(indoApi)
 
 	// Layers...
 	alamatRepo := repository.NewGormAlamat(db)

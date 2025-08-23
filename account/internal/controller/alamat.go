@@ -16,13 +16,13 @@ import (
 type Alamat struct {
 	service    *service.Alamat
 	alamatView view.Alamat
-	payloader  payload.Viewer
+	payloader  payload.Loader
 }
 
 func NewAlamat(
 	service *service.Alamat,
 	alamatView view.Alamat,
-	payloader payload.Viewer,
+	payloader payload.Loader,
 ) Alamat {
 	return Alamat{service, alamatView, payloader}
 }

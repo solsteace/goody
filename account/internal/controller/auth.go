@@ -18,13 +18,13 @@ import (
 type Auth struct {
 	service   *service.Auth
 	authView  view.Auth
-	payloader payload.Viewer
+	payloader payload.Loader
 }
 
 func NewAuth(
 	service *service.Auth,
 	authView view.Auth,
-	payloader payload.Viewer,
+	payloader payload.Loader,
 ) Auth {
 	return Auth{service, authView, payloader}
 }
