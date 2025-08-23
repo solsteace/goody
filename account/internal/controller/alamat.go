@@ -65,14 +65,8 @@ func (ac Alamat) GetById(c *fiber.Ctx) error {
 			JSON(ac.payloader.Err(c.Method(), []error{err}))
 	}
 
-	alamatId, err := c.ParamsInt("id")
-	if err != nil {
-		return c.
-			Status(adapter.HttpStatusCode(err)).
-			JSON(ac.payloader.Err(c.Method(), []error{err}))
-	}
-
-	result, err := ac.service.GetById(auth.UserId, uint(alamatId))
+	idAlamat, _ := c.ParamsInt("id", 0)
+	result, err := ac.service.GetById(auth.UserId, uint(idAlamat))
 	if err != nil {
 		return c.
 			Status(adapter.HttpStatusCode(err)).
@@ -115,10 +109,12 @@ func (ac Alamat) CreateForSelf(c *fiber.Ctx) error {
 		reqPayload.NoTelp,
 		reqPayload.DetailAlamat)
 	if err != nil {
-		return err
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(ac.payloader.Err(c.Method(), []error{err}))
 	}
 
-	resPayload := result.Alamat.ID
+	resPayload := ac.alamatView.Alamat(result.Alamat)
 	return c.
 		Status(http.StatusCreated).
 		JSON(ac.payloader.Ok(c.Method(), resPayload))
@@ -147,16 +143,10 @@ func (ac Alamat) UpdateById(c *fiber.Ctx) error {
 			JSON(ac.payloader.Err(c.Method(), []error{err}))
 	}
 
-	alamatId, err := c.ParamsInt("id")
-	if err != nil {
-		return c.
-			Status(adapter.HttpStatusCode(err)).
-			JSON(ac.payloader.Err(c.Method(), []error{err}))
-	}
-
+	idAlamat, err := c.ParamsInt("id", 0)
 	err = ac.service.UpdateById(
 		auth.UserId,
-		uint(alamatId),
+		uint(idAlamat),
 		reqPayload.JudulAlamat,
 		reqPayload.NamaPenerima,
 		reqPayload.NoTelp,
@@ -184,14 +174,8 @@ func (ac Alamat) DeleteById(c *fiber.Ctx) error {
 			JSON(ac.payloader.Err(c.Method(), []error{err}))
 	}
 
-	alamatId, err := c.ParamsInt("id")
-	if err != nil {
-		return c.
-			Status(adapter.HttpStatusCode(err)).
-			JSON(ac.payloader.Err(c.Method(), []error{err}))
-	}
-
-	if err = ac.service.DeleteById(auth.UserId, uint(alamatId)); err != nil {
+	idAlamat, _ := c.ParamsInt("id", 0)
+	if err := ac.service.DeleteById(auth.UserId, uint(idAlamat)); err != nil {
 		return c.
 			Status(adapter.HttpStatusCode(err)).
 			JSON(ac.payloader.Err(c.Method(), []error{err}))
