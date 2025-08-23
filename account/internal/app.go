@@ -22,6 +22,7 @@ import (
 	"github.com/solsteace/goody/account/internal/route"
 	"github.com/solsteace/goody/account/internal/service"
 	"github.com/solsteace/goody/lib/messaging/event"
+	"github.com/solsteace/goody/lib/payload"
 	goodyToken "github.com/solsteace/goody/lib/token"
 )
 
@@ -36,6 +37,7 @@ func RunApp() {
 		time.Duration(EnvTokenLifetime))
 	indoApi := api.NewEmsifa(EnvIndoApiEndpoint)
 	authToken := middleware.NewAuthToken(jwtAuth)
+	payloader := payload.Rakamin{}
 	viewer := rakamin.NewViewer(indoApi)
 
 	// Layers...
@@ -44,9 +46,9 @@ func RunApp() {
 	authService := service.NewAuth(userRepo, cryptor, jwtAuth)
 	alamatService := service.NewAlamat(alamatRepo)
 	userService := service.NewUser(userRepo, cryptor)
-	authController := controller.NewAuth(&authService, viewer)
-	alamatController := controller.NewAlamat(&alamatService, viewer)
-	userController := controller.NewUser(&userService, viewer)
+	authController := controller.NewAuth(&authService, viewer, payloader)
+	alamatController := controller.NewAlamat(&alamatService, viewer, payloader)
+	userController := controller.NewUser(&userService, viewer, payloader)
 
 	// Routings...
 	app := fiber.New()

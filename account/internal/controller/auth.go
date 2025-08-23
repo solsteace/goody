@@ -11,16 +11,22 @@ import (
 	"github.com/solsteace/goody/account/internal/service"
 	"github.com/solsteace/goody/lib/oops"
 	"github.com/solsteace/goody/lib/oops/adapter"
+	"github.com/solsteace/goody/lib/payload"
 	"github.com/solsteace/goody/lib/token"
 )
 
 type Auth struct {
-	service *service.Auth
-	viewer  view.Auth
+	service   *service.Auth
+	authView  view.Auth
+	payloader payload.Viewer
 }
 
-func NewAuth(service *service.Auth, viewer view.Auth) Auth {
-	return Auth{viewer: viewer, service: service}
+func NewAuth(
+	service *service.Auth,
+	authView view.Auth,
+	payloader payload.Viewer,
+) Auth {
+	return Auth{service, authView, payloader}
 }
 
 func (ac Auth) Login(c *fiber.Ctx) error {
@@ -31,32 +37,20 @@ func (ac Auth) Login(c *fiber.Ctx) error {
 	if err := c.BodyParser(reqPayload); err != nil {
 		return c.
 			Status(adapter.HttpStatusCode(err)).
-			JSON(fiber.Map{
-				"status":  false,
-				"message": fmt.Sprintf("Failed to %s data", c.Method()),
-				"errors":  []string{err.Error()},
-				"data":    ""})
+			JSON(ac.payloader.Err(c.Method(), []error{err}))
 	}
 
 	result, err := ac.service.Login(reqPayload.NoTelp, reqPayload.KataSandi)
 	if err != nil {
 		return c.
 			Status(adapter.HttpStatusCode(err)).
-			JSON(fiber.Map{
-				"status":  false,
-				"message": fmt.Sprintf("Failed to %s data", c.Method()),
-				"errors":  []string{err.Error()},
-				"data":    ""})
+			JSON(ac.payloader.Err(c.Method(), []error{err}))
 	}
 
+	resPayload := ac.authView.Login(result.User, result.AccessToken, result.RefreshToken)
 	return c.
 		Status(http.StatusOK).
-		JSON(fiber.Map{
-			"status":  true,
-			"message": fmt.Sprintf("Succeed to %s data", c.Method()),
-			"errors":  nil,
-			"data": ac.viewer.Login(
-				result.User, result.AccessToken, result.RefreshToken)})
+		JSON(ac.payloader.Ok(c.Method(), resPayload))
 }
 
 func (ac Auth) Register(c *fiber.Ctx) error {
@@ -76,22 +70,14 @@ func (ac Auth) Register(c *fiber.Ctx) error {
 	if err := c.BodyParser(reqPayload); err != nil {
 		return c.
 			Status(adapter.HttpStatusCode(err)).
-			JSON(fiber.Map{
-				"status":  false,
-				"message": fmt.Sprintf("Failed to %s data", c.Method()),
-				"errors":  []error{err},
-				"data":    ""})
+			JSON(ac.payloader.Err(c.Method(), []error{err}))
 	}
 
 	tanggalLahir, err := time.Parse("02/01/2006", reqPayload.TanggalLahir)
 	if err != nil {
 		return c.
 			Status(adapter.HttpStatusCode(err)).
-			JSON(fiber.Map{
-				"status":  false,
-				"message": fmt.Sprintf("Failed to %s data", c.Method()),
-				"errors":  []string{err.Error()},
-				"data":    ""})
+			JSON(ac.payloader.Err(c.Method(), []error{err}))
 	}
 
 	err = ac.service.Register(
@@ -109,20 +95,13 @@ func (ac Auth) Register(c *fiber.Ctx) error {
 	if err != nil {
 		return c.
 			Status(adapter.HttpStatusCode(err)).
-			JSON(fiber.Map{
-				"status":  false,
-				"message": fmt.Sprintf("Failed to %s data", c.Method()),
-				"errors":  []string{err.Error()},
-				"data":    ""})
+			JSON(ac.payloader.Err(c.Method(), []error{err}))
 	}
 
+	resPayload := "Register Succeed"
 	return c.
 		Status(http.StatusCreated).
-		JSON(fiber.Map{
-			"status":  true,
-			"message": fmt.Sprintf("Succeed to %s data", c.Method()),
-			"errors":  nil,
-			"data":    "Register Succeed"})
+		JSON(ac.payloader.Ok(c.Method(), resPayload))
 }
 
 func (ac Auth) Infer(c *fiber.Ctx) error {
@@ -133,11 +112,7 @@ func (ac Auth) Infer(c *fiber.Ctx) error {
 			Msg: "Tidak ditemukan payload yang sesuai pada token"}
 		return c.
 			Status(adapter.HttpStatusCode(err)).
-			JSON(fiber.Map{
-				"status":  false,
-				"message": fmt.Sprintf("Failed to %s data", c.Method()),
-				"errors":  []string{err.Error()},
-				"data":    ""})
+			JSON(ac.payloader.Err(c.Method(), []error{err}))
 	}
 
 	isAdmin := "0"

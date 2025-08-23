@@ -2,7 +2,6 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -11,16 +10,22 @@ import (
 	"github.com/solsteace/goody/account/internal/service"
 	"github.com/solsteace/goody/lib/oops"
 	"github.com/solsteace/goody/lib/oops/adapter"
+	"github.com/solsteace/goody/lib/payload"
 	"github.com/solsteace/goody/lib/token"
 )
 
 type User struct {
-	viewer  view.User
-	service *service.User
+	service   *service.User
+	userView  view.User
+	payloader payload.Viewer
 }
 
-func NewUser(service *service.User, viewer view.User) User {
-	return User{viewer: viewer, service: service}
+func NewUser(
+	service *service.User,
+	viewer view.User,
+	payloader payload.Viewer,
+) User {
+	return User{service, viewer, payloader}
 }
 
 func (uc User) GetProfile(c *fiber.Ctx) error {
@@ -31,33 +36,20 @@ func (uc User) GetProfile(c *fiber.Ctx) error {
 			Msg: "Tidak ditemukan payload yang sesuai pada token"}
 		return c.
 			Status(adapter.HttpStatusCode(err)).
-			JSON(fiber.Map{
-				"status":  false,
-				"message": fmt.Sprintf("Failed to %s data", c.Method()),
-				"errors":  []string{err.Error()},
-				"data":    ""})
+			JSON(uc.payloader.Err(c.Method(), []error{err}))
 	}
 
 	result, err := uc.service.GetProfile(auth.UserId)
 	if err != nil {
 		return c.
 			Status(adapter.HttpStatusCode(err)).
-			JSON(fiber.Map{
-				"status":  false,
-				"message": fmt.Sprintf("Failed to %s data", c.Method()),
-				"errors":  []string{err.Error()},
-				"data":    ""})
+			JSON(uc.payloader.Err(c.Method(), []error{err}))
 	}
 
+	resPayload := uc.userView.User(result.User)
 	return c.
 		Status(http.StatusOK).
-		JSON(fiber.Map{
-			"status":  true,
-			"message": fmt.Sprintf("Succeed to %s data", c.Method()),
-			"errors":  nil,
-			"data": fiber.Map{
-				"user": uc.viewer.User(result.User),
-			}})
+		JSON(uc.payloader.Ok(c.Method(), resPayload))
 }
 
 func (uc User) UpdateProfile(c *fiber.Ctx) error {
@@ -71,11 +63,7 @@ func (uc User) UpdateProfile(c *fiber.Ctx) error {
 	if err := c.BodyParser(reqPayload); err != nil {
 		return c.
 			Status(adapter.HttpStatusCode(err)).
-			JSON(fiber.Map{
-				"status":  false,
-				"message": fmt.Sprintf("Failed to %s data", c.Method()),
-				"errors":  []string{err.Error()},
-				"data":    ""})
+			JSON(uc.payloader.Err(c.Method(), []error{err}))
 	}
 
 	auth, ok := c.Locals("Authorization").(*token.Auth)
@@ -85,22 +73,14 @@ func (uc User) UpdateProfile(c *fiber.Ctx) error {
 			Msg: "Tidak ditemukan payload yang sesuai pada token"}
 		return c.
 			Status(adapter.HttpStatusCode(err)).
-			JSON(fiber.Map{
-				"status":  false,
-				"message": fmt.Sprintf("Failed to %s data", c.Method()),
-				"errors":  []string{err.Error()},
-				"data":    ""})
+			JSON(uc.payloader.Err(c.Method(), []error{err}))
 	}
 
 	tanggalLahir, err := time.Parse("02/01/2006", reqPayload.TanggalLahir)
 	if err != nil {
 		return c.
 			Status(adapter.HttpStatusCode(err)).
-			JSON(fiber.Map{
-				"status":  false,
-				"message": fmt.Sprintf("Failed to %s data", c.Method()),
-				"errors":  []string{err.Error()},
-				"data":    ""})
+			JSON(uc.payloader.Err(c.Method(), []error{err}))
 	}
 
 	result, err := uc.service.UpdateProfile(
@@ -113,22 +93,13 @@ func (uc User) UpdateProfile(c *fiber.Ctx) error {
 	if err != nil {
 		return c.
 			Status(adapter.HttpStatusCode(err)).
-			JSON(fiber.Map{
-				"status":  false,
-				"message": fmt.Sprintf("Failed to %s data", c.Method()),
-				"errors":  []string{err.Error()},
-				"data":    ""})
+			JSON(uc.payloader.Err(c.Method(), []error{err}))
 	}
 
+	resPayload := uc.userView.User(result.User)
 	return c.
 		Status(http.StatusOK).
-		JSON(fiber.Map{
-			"status":  true,
-			"message": "Succeed to POST data",
-			"errors":  nil,
-			"data": fiber.Map{
-				"user": uc.viewer.User(result.User),
-			}})
+		JSON(uc.payloader.Ok(c.Method(), resPayload))
 }
 
 func (uc User) ChangeCredentials(c *fiber.Ctx) error {
@@ -141,11 +112,7 @@ func (uc User) ChangeCredentials(c *fiber.Ctx) error {
 	if err := c.BodyParser(reqPayload); err != nil {
 		return c.
 			Status(adapter.HttpStatusCode(err)).
-			JSON(fiber.Map{
-				"status":  false,
-				"message": fmt.Sprintf("Failed to %s data", c.Method()),
-				"errors":  []string{err.Error()},
-				"data":    ""})
+			JSON(uc.payloader.Err(c.Method(), []error{err}))
 	}
 
 	auth, ok := c.Locals("Authorization").(*token.Auth)
@@ -155,11 +122,7 @@ func (uc User) ChangeCredentials(c *fiber.Ctx) error {
 			Msg: "Tidak ditemukan payload yang sesuai pada token"}
 		return c.
 			Status(adapter.HttpStatusCode(err)).
-			JSON(fiber.Map{
-				"status":  false,
-				"message": fmt.Sprintf("Failed to %s data", c.Method()),
-				"errors":  []string{err.Error()},
-				"data":    ""})
+			JSON(uc.payloader.Err(c.Method(), []error{err}))
 	}
 
 	result, err := uc.service.ChangeCredentials(
@@ -171,20 +134,11 @@ func (uc User) ChangeCredentials(c *fiber.Ctx) error {
 	if err != nil {
 		return c.
 			Status(adapter.HttpStatusCode(err)).
-			JSON(fiber.Map{
-				"status":  false,
-				"message": fmt.Sprintf("Failed to %s data", c.Method()),
-				"errors":  []string{err.Error()},
-				"data":    ""})
+			JSON(uc.payloader.Err(c.Method(), []error{err}))
 	}
 
+	resPayload := uc.userView.User(result.User)
 	return c.
 		Status(http.StatusOK).
-		JSON(fiber.Map{
-			"status":  true,
-			"message": "Succeed to POST data",
-			"errors":  nil,
-			"data": fiber.Map{
-				"user": uc.viewer.User(result.User),
-			}})
+		JSON(uc.payloader.Ok(c.Method(), resPayload))
 }
