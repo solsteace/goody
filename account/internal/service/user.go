@@ -78,9 +78,6 @@ func (us User) ChangeCredentials(
 	if err := us.cryptor.Compare(user.KataSandi, sandiLama); err != nil {
 		return result, err
 	}
-
-	user.Email = email
-	user.NoTelp = noTelp
 	if sandiLama != sandiBaru {
 		digest, err := us.cryptor.Generate(sandiBaru)
 		if err != nil {
@@ -89,6 +86,9 @@ func (us User) ChangeCredentials(
 
 		user.KataSandi = string(digest)
 	}
+
+	user.Email = email
+	user.NoTelp = noTelp
 	if err := us.userRepo.Update(user); err != nil {
 		return result, err
 	}

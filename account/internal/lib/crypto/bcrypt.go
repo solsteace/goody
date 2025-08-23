@@ -1,6 +1,11 @@
 package crypto
 
-import bc "golang.org/x/crypto/bcrypt"
+import (
+	"errors"
+
+	"github.com/solsteace/goody/lib/oops"
+	bc "golang.org/x/crypto/bcrypt"
+)
 
 type bcrypt struct {
 	cost int
@@ -15,5 +20,12 @@ func (b bcrypt) Generate(payload string) ([]byte, error) {
 }
 
 func (b bcrypt) Compare(digest, payload string) error {
-	return bc.CompareHashAndPassword([]byte(digest), []byte(payload))
+	switch err := bc.CompareHashAndPassword([]byte(digest), []byte(payload)); {
+	case errors.Is(err, bc.ErrMismatchedHashAndPassword):
+		return oops.Unauthorized{
+			Err: err,
+			Msg: "Sandi yang diberikan tidak cocok"}
+	default:
+		return nil
+	}
 }

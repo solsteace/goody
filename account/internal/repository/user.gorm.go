@@ -1,10 +1,12 @@
 package repository
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/solsteace/goody/account/internal/domain"
-	"github.com/solsteace/goody/lib/errors"
+	"github.com/solsteace/goody/lib/oops"
 	"gorm.io/gorm"
 )
 
@@ -32,7 +34,7 @@ func (gu gormUserRow) TableName() string {
 }
 
 func (gu gormUserRow) toUser() (domain.User, error) {
-	u, err := domain.NewUser(
+	return domain.NewUser(
 		&gu.ID,
 		gu.Nama,
 		gu.KataSandi,
@@ -47,11 +49,6 @@ func (gu gormUserRow) toUser() (domain.User, error) {
 		gu.IdKota,
 		gu.UpdatedAt,
 		gu.CreatedAt)
-	if err != nil {
-		return domain.User{}, err
-	}
-
-	return u, nil
 }
 
 func newGormUserRow(user domain.User) gormUserRow {
@@ -69,8 +66,7 @@ func newGormUserRow(user domain.User) gormUserRow {
 		IdProvinsi:   user.IdProvinsi,
 		IdKota:       user.IdKota,
 		UpdatedAt:    user.UpdatedAt,
-		CreatedAt:    user.CreatedAt,
-	}
+		CreatedAt:    user.CreatedAt}
 }
 
 type gormUser struct {
@@ -91,37 +87,52 @@ func (gu gormUser) GetById(id uint) (domain.User, error) {
 		Where("id = ?", id).
 		First(&row)
 	if result.Error != nil {
-		return domain.User{}, errors.Standardize(result.Error)
+		switch {
+		case errors.Is(result.Error, gorm.ErrRecordNotFound):
+			return domain.User{}, oops.NotFound{
+				Err: result.Error,
+				Msg: fmt.Sprintf("User(id: %d) tidak ditemukan", id)}
+		default:
+			return domain.User{}, result.Error
+		}
 	}
 
-	user, err := row.toUser()
-	if err != nil {
-		return domain.User{}, errors.Standardize(err)
-	}
-	return user, errors.Standardize(err)
+	return row.toUser()
 }
 
-func (gu gormUser) GetByPhoneNumber(phone string) (domain.User, error) {
+func (gu gormUser) GetByPhoneNumber(noTelp string) (domain.User, error) {
 	row := new(gormUserRow)
 	result := gu.db.
-		Where("no_telp = ?", phone).
+		Where("no_telp = ?", noTelp).
 		First(&row)
 	if result.Error != nil {
-		return domain.User{}, errors.Standardize(result.Error)
+		switch {
+		case errors.Is(result.Error, gorm.ErrRecordNotFound):
+			return domain.User{}, oops.NotFound{
+				Err: result.Error,
+				Msg: fmt.Sprintf("User(telepon: %s) tidak ditemukan", noTelp)}
+		default:
+			return domain.User{}, result.Error
+		}
 	}
 
-	user, err := row.toUser()
-	if err != nil {
-		return domain.User{}, errors.Standardize(result.Error)
-	}
-	return user, errors.Standardize(result.Error)
+	return row.toUser()
 }
 
 func (gu gormUser) Create(u domain.User) (uint, error) {
 	user := newGormUserRow(u)
 	result := gu.db.Create(&user)
 	if result.Error != nil {
-		return 0, result.Error
+		switch {
+		case errors.Is(result.Error, gorm.ErrDuplicatedKey):
+			return 0, oops.BadValues{
+				Err: result.Error,
+				Msg: fmt.Sprintf(
+					"Email `%s` atau telepon `%s` telah digunakan user lain",
+					u.Email, u.NoTelp)}
+		default:
+			return 0, result.Error
+		}
 	}
 	return user.ID, nil
 }
@@ -132,7 +143,16 @@ func (gu gormUser) Update(u domain.User) error {
 		Where("id = ?", user.ID).
 		Updates(user)
 	if result.Error != nil {
-		return result.Error
+		switch {
+		case errors.Is(result.Error, gorm.ErrDuplicatedKey):
+			return oops.BadValues{
+				Err: result.Error,
+				Msg: fmt.Sprintf(
+					"Email `%s` atau telepon `%s` telah digunakan user lain",
+					u.Email, u.NoTelp)}
+		default:
+			return result.Error
+		}
 	}
 	return nil
 }

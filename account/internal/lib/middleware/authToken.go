@@ -1,9 +1,12 @@
 package middleware
 
 import (
-	"net/http"
+	"errors"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/solsteace/goody/lib/oops"
+	"github.com/solsteace/goody/lib/oops/adapter"
 	"github.com/solsteace/goody/lib/token"
 	"github.com/solsteace/goody/lib/token/payload"
 )
@@ -19,11 +22,16 @@ func NewAuthToken(handler token.Handler[payload.Auth]) AuthToken {
 func (a AuthToken) Handle(c *fiber.Ctx) error {
 	token := c.Get("Authorization", "")
 	if token == "" {
+		err := oops.Unauthorized{
+			Err: errors.New("Token wasn't found in `Authorization` header"),
+			Msg: "Token tidak ditemukan pada header `Authorization`"}
 		return c.
-			Status(http.StatusUnauthorized).
+			Status(adapter.HttpStatusCode(err)).
 			JSON(fiber.Map{
-				"message": "Token wasn't found in `Authorization` header",
-			})
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []error{err},
+				"data":    ""})
 	}
 
 	payload, err := a.tokenHandler.Decode(token)

@@ -8,7 +8,7 @@ import (
 	"github.com/solsteace/goody/account/internal/domain"
 	"github.com/solsteace/goody/account/internal/lib/crypto"
 	"github.com/solsteace/goody/account/internal/repository"
-	appError "github.com/solsteace/goody/lib/errors"
+	"github.com/solsteace/goody/lib/oops"
 	"github.com/solsteace/goody/lib/token"
 	"github.com/solsteace/goody/lib/token/payload"
 )
@@ -58,7 +58,7 @@ func (as Auth) Login(noTelp, kataSandi string) (
 
 	// TODO: add rate limiting
 	if err := as.cryptor.Compare(user.KataSandi, kataSandi); err != nil {
-		return result, errors.New("Password and phone number doesn't match")
+		return result, err
 	}
 
 	accessToken, err := as.tokenHandler.Encode(payload.NewAuth(user.ID, user.IsAdmin))
@@ -85,13 +85,14 @@ func (as Auth) Register(
 	idKota string,
 ) error {
 	existingUser, err := as.userRepo.GetByPhoneNumber(noTelp)
-	if err != nil {
-		if !errors.Is(err, appError.NotFound{}) {
-			return err
-		}
+	if err != nil && !errors.As(err, &oops.NotFound{}) {
+		return err
 	}
 	if existingUser.ID != 0 {
-		return errors.New("This phone number is already used")
+		return oops.BadValues{
+			Err: errors.New("This phone number is already used"),
+			Msg: "Nomor telepon yang diberikan sudah digunakan user lain",
+		}
 	}
 
 	passDigest, err := as.cryptor.Generate(kataSandi)

@@ -1,11 +1,11 @@
 package service
 
 import (
-	"errors"
 	"time"
 
 	"github.com/solsteace/goody/account/internal/domain"
 	"github.com/solsteace/goody/account/internal/repository"
+	"github.com/solsteace/goody/lib/oops"
 )
 
 type Alamat struct {
@@ -40,7 +40,9 @@ func (as Alamat) GetById(userId, id uint) (
 		return result, err
 	}
 	if alamat.UserId != userId {
-		return result, errors.New("You don't own this `alamat`")
+		return result, oops.Forbidden{
+			Err: err,
+			Msg: "Anda tidak memiliki akses alamat ini"}
 	}
 
 	result.Alamat = alamat
@@ -92,7 +94,9 @@ func (as Alamat) UpdateById(
 		return err
 	}
 	if alamat.UserId != userId {
-		return errors.New("You don't own this `alamat`")
+		return oops.Forbidden{
+			Err: err,
+			Msg: "Anda tidak memiliki akses alamat ini"}
 	}
 
 	alamat.JudulAlamat = judulAlamat
@@ -111,7 +115,9 @@ func (as Alamat) DeleteById(userId, id uint) error {
 		return err
 	}
 	if alamat.UserId != userId {
-		return errors.New("You don't own this `alamat`")
+		return oops.Forbidden{
+			Err: err,
+			Msg: "Anda tidak memiliki akses alamat ini"}
 	}
 
 	if err := as.repo.DeleteById(alamat.ID); err != nil {

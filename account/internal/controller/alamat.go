@@ -2,11 +2,14 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/solsteace/goody/account/internal/lib/view"
 	"github.com/solsteace/goody/account/internal/service"
+	"github.com/solsteace/goody/lib/oops"
+	"github.com/solsteace/goody/lib/oops/adapter"
 	"github.com/solsteace/goody/lib/token/payload"
 )
 
@@ -25,7 +28,16 @@ func NewAlamat(
 func (ac Alamat) GetSelf(c *fiber.Ctx) error {
 	auth, ok := c.Locals("Authorization").(*payload.Auth)
 	if !ok {
-		return errors.New("Payload wasn't found on `Authorization` token")
+		err := oops.Unauthorized{
+			Err: errors.New("Payload wasn't found on `Authorization` token"),
+			Msg: "Tidak ditemukan payload yang sesuai pada token"}
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	page := c.QueryInt("page", 1)
@@ -36,21 +48,28 @@ func (ac Alamat) GetSelf(c *fiber.Ctx) error {
 		return err
 	}
 
-	resPayload := ac.viewer.ManyAlamat(result.Alamat)
 	return c.
 		Status(http.StatusOK).
 		JSON(fiber.Map{
 			"status":  true,
 			"message": "Succeed to GET data",
 			"errors":  nil,
-			"data":    resPayload,
-		})
+			"data":    ac.viewer.ManyAlamat(result.Alamat)})
 }
 
 func (ac Alamat) GetById(c *fiber.Ctx) error {
 	auth, ok := c.Locals("Authorization").(*payload.Auth)
 	if !ok {
-		return errors.New("Payload wasn't found on `Authorization` token")
+		err := oops.Unauthorized{
+			Err: errors.New("Payload wasn't found on `Authorization` token"),
+			Msg: "Tidak ditemukan payload yang sesuai pada token"}
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	alamatId, err := c.ParamsInt("id")
@@ -63,27 +82,13 @@ func (ac Alamat) GetById(c *fiber.Ctx) error {
 		return err
 	}
 
-	resPayload := struct {
-		Id           uint   `json:"id"`
-		JudulAlamat  string `json:"judul_alamat"`
-		NamaPenerima string `json:"nama_penerima"`
-		NoTelp       string `json:"no_telp" `
-		DetailAlamat string `json:"detail_alamat"`
-	}{
-		Id:           result.Alamat.ID,
-		JudulAlamat:  result.Alamat.JudulAlamat,
-		NamaPenerima: result.Alamat.NamaPenerima,
-		NoTelp:       result.Alamat.NoTelp,
-		DetailAlamat: result.Alamat.DetailAlamat,
-	}
 	return c.
 		Status(http.StatusOK).
 		JSON(fiber.Map{
 			"status":  true,
 			"message": "Succeed to POST data",
 			"errors":  nil,
-			"data":    resPayload,
-		})
+			"data":    ac.viewer.Alamat(result.Alamat)})
 }
 
 func (ac Alamat) CreateForSelf(c *fiber.Ctx) error {
@@ -94,12 +99,27 @@ func (ac Alamat) CreateForSelf(c *fiber.Ctx) error {
 		DetailAlamat string `json:"detail_alamat"`
 	})
 	if err := c.BodyParser(reqPayload); err != nil {
-		return err
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	auth, ok := c.Locals("Authorization").(*payload.Auth)
 	if !ok {
-		return errors.New("Payload wasn't found on `Authorization` token")
+		err := oops.Unauthorized{
+			Err: errors.New("Payload wasn't found on `Authorization` token"),
+			Msg: "Tidak ditemukan payload yang sesuai pada token"}
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	result, err := ac.service.CreateForSelf(
@@ -119,8 +139,7 @@ func (ac Alamat) CreateForSelf(c *fiber.Ctx) error {
 			"status":  true,
 			"message": "Succeed to POST data",
 			"errors":  nil,
-			"data":    resPayload,
-		})
+			"data":    resPayload})
 }
 
 func (ac Alamat) UpdateById(c *fiber.Ctx) error {
@@ -136,12 +155,27 @@ func (ac Alamat) UpdateById(c *fiber.Ctx) error {
 
 	auth, ok := c.Locals("Authorization").(*payload.Auth)
 	if !ok {
-		return errors.New("Payload wasn't found on `Authorization` token")
+		err := oops.Unauthorized{
+			Err: errors.New("Payload wasn't found on `Authorization` token"),
+			Msg: "Tidak ditemukan payload yang sesuai pada token"}
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	alamatId, err := c.ParamsInt("id")
 	if err != nil {
-		return err
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	err = ac.service.UpdateById(
@@ -152,34 +186,65 @@ func (ac Alamat) UpdateById(c *fiber.Ctx) error {
 		reqPayload.NoTelp,
 		reqPayload.DetailAlamat)
 	if err != nil {
-		return err
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
-	resPayload := ""
 	return c.
 		Status(http.StatusOK).
 		JSON(fiber.Map{
 			"status":  true,
-			"message": "Succeed to POST data",
+			"message": fmt.Sprintf("Succeed to %s data", c.Method()),
 			"errors":  nil,
-			"data":    resPayload,
-		})
+			"data":    ""})
 }
 
 func (ac Alamat) DeleteById(c *fiber.Ctx) error {
 	auth, ok := c.Locals("Authorization").(*payload.Auth)
 	if !ok {
-		return errors.New("Payload wasn't found on `Authorization` token")
+		err := oops.Unauthorized{
+			Err: errors.New("Payload wasn't found on `Authorization` token"),
+			Msg: "Tidak ditemukan payload yang sesuai pada token"}
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	alamatId, err := c.ParamsInt("id")
 	if err != nil {
-		return err
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	if err = ac.service.DeleteById(auth.UserId, uint(alamatId)); err != nil {
-		return err
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
-	return c.SendStatus(http.StatusNoContent)
+	return c.
+		Status(http.StatusCreated).
+		JSON(fiber.Map{
+			"status":  true,
+			"message": fmt.Sprintf("Succeed to %s data", c.Method()),
+			"errors":  nil,
+			"data":    ""})
 }

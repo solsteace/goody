@@ -2,12 +2,15 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/solsteace/goody/account/internal/lib/view"
 	"github.com/solsteace/goody/account/internal/service"
+	"github.com/solsteace/goody/lib/oops"
+	"github.com/solsteace/goody/lib/oops/adapter"
 	"github.com/solsteace/goody/lib/token/payload"
 )
 
@@ -23,19 +26,34 @@ func NewUser(service *service.User, viewer view.User) User {
 func (uc User) GetProfile(c *fiber.Ctx) error {
 	auth, ok := c.Locals("Authorization").(*payload.Auth)
 	if !ok {
-		return errors.New("Payload wasn't found on `Authorization` token")
+		err := oops.Unauthorized{
+			Err: errors.New("Payload wasn't found on `Authorization` token"),
+			Msg: "Tidak ditemukan payload yang sesuai pada token"}
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	result, err := uc.service.GetProfile(auth.UserId)
 	if err != nil {
-		return err
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	return c.
 		Status(http.StatusOK).
 		JSON(fiber.Map{
 			"status":  true,
-			"message": "Succeed to POST data",
+			"message": fmt.Sprintf("Succeed to %s data", c.Method()),
 			"errors":  nil,
 			"data": fiber.Map{
 				"user": uc.viewer.User(result.User),
@@ -51,17 +69,38 @@ func (uc User) UpdateProfile(c *fiber.Ctx) error {
 		IdKota       string `json:"id_kota"`
 	})
 	if err := c.BodyParser(reqPayload); err != nil {
-		return err
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	auth, ok := c.Locals("Authorization").(*payload.Auth)
 	if !ok {
-		return errors.New("Authorization payload wasn't found")
+		err := oops.Unauthorized{
+			Err: errors.New("Payload wasn't found on `Authorization` token"),
+			Msg: "Tidak ditemukan payload yang sesuai pada token"}
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	tanggalLahir, err := time.Parse("02/01/2006", reqPayload.TanggalLahir)
 	if err != nil {
-		return err
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	result, err := uc.service.UpdateProfile(
@@ -72,7 +111,13 @@ func (uc User) UpdateProfile(c *fiber.Ctx) error {
 		reqPayload.IdProvinsi,
 		reqPayload.IdKota)
 	if err != nil {
-		return err
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	return c.
@@ -94,12 +139,27 @@ func (uc User) ChangeCredentials(c *fiber.Ctx) error {
 		KataSandiBaru string `json:"kata_sandi_baru"`
 	})
 	if err := c.BodyParser(reqPayload); err != nil {
-		return err
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	auth, ok := c.Locals("Authorization").(*payload.Auth)
 	if !ok {
-		return errors.New("Payload wasn't found on `Authorization` token")
+		err := oops.Unauthorized{
+			Err: errors.New("Payload wasn't found on `Authorization` token"),
+			Msg: "Tidak ditemukan payload yang sesuai pada token"}
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	result, err := uc.service.ChangeCredentials(
@@ -109,7 +169,13 @@ func (uc User) ChangeCredentials(c *fiber.Ctx) error {
 		reqPayload.KataSandiLama,
 		reqPayload.KataSandiBaru)
 	if err != nil {
-		return err
+		return c.
+			Status(adapter.HttpStatusCode(err)).
+			JSON(fiber.Map{
+				"status":  false,
+				"message": fmt.Sprintf("Failed to %s data", c.Method()),
+				"errors":  []string{err.Error()},
+				"data":    ""})
 	}
 
 	return c.

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	goJwt "github.com/golang-jwt/jwt/v5"
+	"github.com/solsteace/goody/lib/oops"
 )
 
 type jwt[PayloadType any] struct {
@@ -57,6 +58,7 @@ func (j jwt[PayloadType]) Encode(payload PayloadType) (string, error) {
 }
 
 func (j jwt[PayloadType]) Decode(token string) (*PayloadType, error) {
+	// https://pkg.go.dev/github.com/golang-jwt/jwt/v5#example-ParseWithClaims-CustomClaimsType
 	parsedToken, err := goJwt.ParseWithClaims(
 		token,
 		new(theClaims[PayloadType]),
@@ -64,10 +66,23 @@ func (j jwt[PayloadType]) Decode(token string) (*PayloadType, error) {
 			return j.secret, nil
 		},
 		goJwt.WithValidMethods([]string{j.method.Alg()}))
-
-	// https://pkg.go.dev/github.com/golang-jwt/jwt/v5#example-ParseWithClaims-CustomClaimsType
 	if err != nil {
-		return nil, err
+		switch {
+		case errors.Is(err, goJwt.ErrTokenExpired):
+			return nil, oops.Unauthorized{
+				Err: err,
+				Msg: "Token autentikasi telah kadaluarsa. Silakan login kembali"}
+		case errors.Is(err, goJwt.ErrTokenUsedBeforeIssued):
+			return nil, oops.Unauthorized{
+				Err: err,
+				Msg: "Token tidak dapat digunakan sebelum masa berlakunyas"}
+		case errors.Is(err, goJwt.ErrTokenMalformed):
+			return nil, oops.Unauthorized{
+				Err: err,
+				Msg: "Token invalid"}
+		default:
+			return nil, err
+		}
 	}
 
 	if claims, ok := parsedToken.Claims.(*theClaims[PayloadType]); ok {

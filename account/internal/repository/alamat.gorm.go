@@ -1,10 +1,11 @@
 package repository
 
 import (
+	"errors"
 	"time"
 
 	"github.com/solsteace/goody/account/internal/domain"
-	"github.com/solsteace/goody/lib/errors"
+	"github.com/solsteace/goody/lib/oops"
 	"gorm.io/gorm"
 )
 
@@ -25,7 +26,7 @@ func (row gormAlamatRow) TableName() string {
 }
 
 func (row gormAlamatRow) toAlamat() (domain.Alamat, error) {
-	a, err := domain.NewAlamat(
+	return domain.NewAlamat(
 		&row.ID,
 		row.IdUser,
 		row.JudulAlamat,
@@ -34,10 +35,6 @@ func (row gormAlamatRow) toAlamat() (domain.Alamat, error) {
 		row.DetailAlamat,
 		row.CreatedAt,
 		row.UpdatedAt)
-	if err != nil {
-		return domain.Alamat{}, err
-	}
-	return a, nil
 }
 
 func newGormAlamatRow(alamat domain.Alamat) gormAlamatRow {
@@ -73,7 +70,14 @@ func (ga gormAlamat) GetManyByUserId(
 		Limit(limit).
 		Find(&rows)
 	if result.Error != nil {
-		return []domain.Alamat{}, errors.Standardize(result.Error)
+		switch {
+		case errors.Is(result.Error, gorm.ErrRecordNotFound):
+			return []domain.Alamat{}, oops.NotFound{
+				Err: result.Error,
+				Msg: "Alamat tidak ditemukan"}
+		default:
+			return []domain.Alamat{}, result.Error
+		}
 	}
 
 	daftarAlamat := []domain.Alamat{}
@@ -93,14 +97,31 @@ func (ga gormAlamat) GetById(id uint) (domain.Alamat, error) {
 		Where("id = ?", id).
 		First(&row)
 	if result.Error != nil {
-		return domain.Alamat{}, errors.Standardize(result.Error)
+		switch {
+		case errors.Is(result.Error, gorm.ErrRecordNotFound):
+			return domain.Alamat{}, oops.NotFound{
+				Err: result.Error,
+				Msg: "Alamat tidak ditemukan"}
+		default:
+			return domain.Alamat{}, result.Error
+		}
 	}
 
-	alamat, err := row.toAlamat()
-	if err != nil {
-		return domain.Alamat{}, errors.Standardize(result.Error)
+	return row.toAlamat()
+}
+
+func (ga gormAlamat) Create(alamat domain.Alamat) (uint, error) {
+	row := newGormAlamatRow(alamat)
+	result := ga.db.Create(&row)
+	if result.Error != nil {
+		switch {
+		case errors.Is(result.Error, gorm.ErrDuplicatedKey):
+			return 0, oops.BadValues{Err: result.Error}
+		default:
+			return 0, result.Error
+		}
 	}
-	return alamat, errors.Standardize(result.Error)
+	return row.ID, nil
 }
 
 func (ga gormAlamat) Update(alamat domain.Alamat) error {
@@ -109,7 +130,12 @@ func (ga gormAlamat) Update(alamat domain.Alamat) error {
 		Where("id = ?", row.ID).
 		Updates(row)
 	if result.Error != nil {
-		return result.Error
+		switch {
+		case errors.Is(result.Error, gorm.ErrDuplicatedKey):
+			return oops.BadValues{Err: result.Error}
+		default:
+			return result.Error
+		}
 	}
 	return nil
 }
@@ -123,13 +149,4 @@ func (ga gormAlamat) DeleteById(id uint) error {
 		return result.Error
 	}
 	return nil
-}
-
-func (ga gormAlamat) Create(alamat domain.Alamat) (uint, error) {
-	row := newGormAlamatRow(alamat)
-	result := ga.db.Create(&row)
-	if result.Error != nil {
-		return 0, result.Error
-	}
-	return row.ID, nil
 }
