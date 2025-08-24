@@ -7,55 +7,79 @@ services:
       - ./etc/caddy:/etc/caddy
       - caddy-vol:/data
 
-  mq:
-    image: rabbitmq:4.1-management-alpine
-    ports:
-      - 5672:15672
-    environment:
-      RABBITMQ_DEFAULT_USER: goody
-      RABBITMQ_DEFAULT_PASS: goodypass
-
-  account:
+  crud:
     build:
-      dockerfile: ./account/Dockerfile
+      dockerfile: ./crud/Dockerfile
       target: devel
     volumes:
-      - ./account:/app/account
+      - ./crud:/app/crud
       - ./lib:/app/lib
     env_file: 
-      - path: "./account/.env"
+      - path: "./crud/.env"
         required: true
-  account-db:
+  crud-db:
     image: mariadb:lts-ubi9
     volumes:
-      - account-vol:/var/lib/mysql
+      - crud-vol:/var/lib/mysql
     environment:
       MARIADB_ROOT_PASSWORD: what_would_it_be_i_wonder
       MARIADB_USER: goodyapp
       MARIADB_PASSWORD: perhaps_i_should_try_this_one
       MARIADB_DATABASE: goody
 
-  catalog:
-    build:
-      dockerfile: ./catalog/Dockerfile
-      target: devel
-    volumes:
-      - ./catalog:/app/catalog
-      - ./lib:/app/lib
-    env_file: 
-      - path: "./catalog/.env"
-        required: true
-  catalog-db:
-    image: mariadb:lts-ubi9
-    volumes:
-      - catalog-vol:/var/lib/mysql
-    environment:
-      MARIADB_ROOT_PASSWORD: what_would_it_be_i_wonder
-      MARIADB_USER: goodyapp
-      MARIADB_PASSWORD: perhaps_i_should_try_this_one
-      MARIADB_DATABASE: goody
 volumes:
+  crud-vol:
   caddy-vol:
-  account-vol:
-  catalog-vol:
+
+#   mq:
+#     image: rabbitmq:4.1-management-alpine
+#     ports:
+#       - 5672:15672
+#     environment:
+#       RABBITMQ_DEFAULT_USER: goody
+#       RABBITMQ_DEFAULT_PASS: goodypass
+
+#   account:
+#     build:
+#       dockerfile: ./account/Dockerfile
+#       target: devel
+#     volumes:
+#       - ./account:/app/account
+#       - ./lib:/app/lib
+#     env_file: 
+#       - path: "./account/.env"
+#         required: true
+#   account-db:
+#     image: mariadb:lts-ubi9
+#     volumes:
+#       - account-vol:/var/lib/mysql
+#     environment:
+#       MARIADB_ROOT_PASSWORD: what_would_it_be_i_wonder
+#       MARIADB_USER: goodyapp
+#       MARIADB_PASSWORD: perhaps_i_should_try_this_one
+#       MARIADB_DATABASE: goody
+
+#   catalog:
+#     build:
+#       dockerfile: ./catalog/Dockerfile
+#       target: devel
+#     volumes:
+#       - ./catalog:/app/catalog
+#       - ./lib:/app/lib
+#     env_file: 
+#       - path: "./catalog/.env"
+#         required: true
+#   catalog-db:
+#     image: mariadb:lts-ubi9
+#     volumes:
+#       - catalog-vol:/var/lib/mysql
+#     environment:
+#       MARIADB_ROOT_PASSWORD: what_would_it_be_i_wonder
+#       MARIADB_USER: goodyapp
+#       MARIADB_PASSWORD: perhaps_i_should_try_this_one
+#       MARIADB_DATABASE: goody
+# volumes:
+#   caddy-vol:
+#   account-vol:
+#   catalog-vol:
 

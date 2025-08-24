@@ -1,21 +1,27 @@
-# When a request goes here...
 :80 {
-    # Does the path starts with this? If yes, trim up to wildcard (*)
-    handle_path /account/* {
-        # Route the requests here
-        reverse_proxy account:8880
-    }
-
-    handle_path /catalog/* {
-        forward_auth account:8880 {
-            uri /api/auth/v1/infer
-
-            # TODO: Get headers from received request and put them on the forwarded request
-            copy_headers X-User-Id X-User-IsAdmin
-        }
-        
-        reverse_proxy catalog:8880 {
-            header_up test 123
-        }
+    handle_path /* {
+        reverse_proxy crud:8880
     }
 }
+
+# When a request goes here...
+#:80 {
+    # Does the path starts with this? If yes, trim up to wildcard (*)
+    #handle_path /account/* {
+        # Route the requests here
+        #reverse_proxy account:8880
+    #}
+
+    #handle_path /catalog/* {
+        #forward_auth account:8880 {
+            #uri /api/auth/v1/infer
+
+            # TODO: Get headers from received request and put them on the forwarded request
+            #copy_headers X-User-Id X-User-IsAdmin
+        #}
+        
+        #reverse_proxy catalog:8880 {
+            #header_up test 123
+        #}
+    #}
+#}

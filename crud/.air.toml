@@ -1,0 +1,7 @@
+root = "./crud"
+
+[build]
+    cmd = "go build -o ./crud/tmp/out ./crud/cmd"
+    bin = "./crud/tmp/out"
+[log]
+    time = true
