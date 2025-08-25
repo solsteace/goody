@@ -121,18 +121,34 @@ func (gu gormUser) GetByPhoneNumber(noTelp string) (domain.User, error) {
 
 func (gu gormUser) Create(u domain.User) (uint, error) {
 	user := newGormUserRow(u)
-	result := gu.db.Create(&user)
-	if result.Error != nil {
-		switch {
-		case errors.Is(result.Error, gorm.ErrDuplicatedKey):
-			return 0, oops.BadValues{
-				Err: result.Error,
-				Msg: fmt.Sprintf(
-					"Email `%s` atau telepon `%s` telah digunakan user lain",
-					u.Email, u.NoTelp)}
-		default:
-			return 0, result.Error
+	err := gu.db.Transaction(func(tx *gorm.DB) error {
+		result := tx.Create(&user)
+		if result.Error != nil {
+			switch {
+			case errors.Is(result.Error, gorm.ErrDuplicatedKey):
+				return oops.BadValues{
+					Err: result.Error,
+					Msg: fmt.Sprintf(
+						"Email `%s` atau telepon `%s` telah digunakan user lain",
+						u.Email, u.NoTelp)}
+			default:
+				return result.Error
+			}
 		}
+
+		toko := &gormTokoRow{
+			IdUser:   user.ID,
+			NamaToko: fmt.Sprintf("Toko %s", user.Nama),
+			UrlFoto:  ""}
+		result = tx.Create(&toko)
+		if result.Error != nil {
+			return result.Error
+		}
+		return nil
+	})
+
+	if err != nil {
+		return 0, err
 	}
 	return user.ID, nil
 }
