@@ -22,6 +22,9 @@ var (
 
 	// The API endpoint to fetch data related to Indonesian provinces, regencies, cities, and more
 	EnvIndoApiEndpoint string
+
+	// The base path used for saving uploaded files
+	EnvUploadSaveBasePath string
 )
 
 func loadEnv() {
@@ -44,4 +47,5 @@ func loadEnv() {
 	EnvTokenLifetime = uint(tokenLifetime)
 
 	EnvIndoApiEndpoint = os.Getenv("INDO_API_ENDPOINT")
+	EnvUploadSaveBasePath = os.Getenv("UPLOAD_SAVE_BASE_PATH")
 }
