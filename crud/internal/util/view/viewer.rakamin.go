@@ -143,3 +143,18 @@ func (r rakamin) ManyToko(toko []domain.Toko) []any {
 	}
 	return view
 }
+
+type rakaminProduk struct {
+}
+
+func (r rakamin) Produk(produk domain.Produk) any {
+	return rakaminProduk{}
+}
+
+func (r rakamin) ManyProduk(produk []domain.Produk) []any {
+	view := []any{}
+	for _, t := range produk {
+		view = append(view, r.Produk(t))
+	}
+	return view
+}

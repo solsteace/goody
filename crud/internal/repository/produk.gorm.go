@@ -66,13 +66,24 @@ func NewGormProduk(db *gorm.DB) gormProduk {
 	return gormProduk{db: db}
 }
 
-func (gp gormProduk) GetMany(page int, limit int) ([]domain.Produk, error) {
+func (gp gormProduk) GetMany(params produkQueryParams) ([]domain.Produk, error) {
+	query := gp.db.
+		Offset(params.offset()).
+		Limit(params.limit).
+		Where("harga_reseller < ?", params.maxHarga).
+		Where("harga_konsumen < ?", params.maxHarga).
+		Where("harga_reseller > ?", params.minHarga).
+		Where("harga_konsumer > ?", params.minHarga).
+		Where("nama LIKE ?", "%"+params.nama+"%")
+	if params.kategoriId != 0 {
+		query = query.Where("id_kategori = ?", params.kategoriId)
+	}
+	if params.tokoId != 0 {
+		query = query.Where("id_toko = ?", params.tokoId)
+	}
+
 	rows := new([]gormProdukRow)
-	result := gp.db.
-		Preload(gormProdukRow{}.TableName()).
-		Offset(produkOffset(page, limit)).
-		Limit(limit).
-		Find(&rows)
+	result := query.Find(&rows)
 	if result.Error != nil {
 		return []domain.Produk{}, nil
 	}
@@ -134,4 +145,8 @@ func (gp gormProduk) DeleteById(id uint) error {
 		return result.Error
 	}
 	return nil
+}
+
+func (gp gormProduk) OwnedBy(userId, produkId uint) (bool, error) {
+	return true, nil
 }

@@ -2,6 +2,9 @@ package internal
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"path"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -20,7 +23,11 @@ import (
 	goodyToken "github.com/solsteace/goody/lib/token"
 )
 
+// Preparing save paths
 func RunApp() {
+	// ========================================
+	// Initializations...
+	// ========================================
 	loadEnv()
 	upSince := time.Now().Unix()
 	db := storage.NewGorm(EnvDbUrl)
@@ -34,18 +41,39 @@ func RunApp() {
 	viewer := view.NewRakamin(indoApi)
 	authToken := middleware.NewAuthToken(jwtAuth)
 	errorHandler := middleware.NewErrorHandler(payloader)
+	// userContext := middleware.NewUserContext()
+
+	savePaths := map[string]string{
+		"toko":   path.Join(EnvUploadSaveBasePath, "toko"),
+		"produk": path.Join(EnvUploadSaveBasePath, "produk")}
+	for _, savePath := range savePaths {
+		if err := os.MkdirAll(savePath, 0777); err != nil {
+			log.Fatalf("Failed creating directory: %v", err)
+		}
+	}
 
 	// ========================================
 	// Layers...
 	// ========================================
 	alamatRepo := repository.NewGormAlamat(db)
 	userRepo := repository.NewGormUser(db)
+	// kategoriRepo := repository.NewGormKategori(db)
+	// produkRepo := repository.NewGormProduk(db)
+	// tokoRepo := repository.NewGormToko(db)
+
 	authService := service.NewAuth(userRepo, cryptor, jwtAuth)
 	alamatService := service.NewAlamat(alamatRepo)
 	userService := service.NewUser(userRepo, cryptor)
+	// kategoriService := service.NewKategori(kategoriRepo)
+	// tokoService := service.NewToko(tokoRepo, savePaths["toko"])
+	// produkService := service.NewProduk(produkRepo)
+
 	authController := controller.NewAuth(&authService, viewer, payloader)
 	alamatController := controller.NewAlamat(&alamatService, viewer, payloader)
 	userController := controller.NewUser(&userService, viewer, payloader)
+	// kategoriController := controller.NewKategori(kategoriService, viewer, payloader)
+	// tokoControler := controller.NewToko(tokoService, viewer)
+	// produkController := controller.NewProduk(produkService, viewer, payloader)
 
 	// ========================================
 	// Routings...
@@ -57,6 +85,9 @@ func RunApp() {
 	api := app.Group("/api")
 	route.UseAuth(&api, &authController, authToken)
 	route.UseUser(&api, &userController, &alamatController, authToken)
+	// route.UseProduk(&api, &produkController, authToken, userContext)
+	// route.UseToko(&api, &tokoControler)
+	// route.UseKategori(&api, &kategoriController)
 	api.Get("/health", func(c *fiber.Ctx) error {
 		upTime := time.Now().Unix() - upSince
 		return c.SendString(fmt.Sprintf("%d", upTime))

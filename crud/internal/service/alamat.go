@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/solsteace/goody/crud/internal/domain"
@@ -41,7 +43,8 @@ func (as Alamat) GetById(userId, id uint) (
 	}
 	if alamat.UserId != userId {
 		return result, oops.Forbidden{
-			Err: err,
+			Err: errors.New(fmt.Sprintf("User(id:%d) doesn't own Alamat(id:%d)",
+				userId, alamat.UserId)),
 			Msg: "Anda tidak memiliki akses alamat ini"}
 	}
 
@@ -95,7 +98,8 @@ func (as Alamat) UpdateById(
 	}
 	if alamat.UserId != userId {
 		return oops.Forbidden{
-			Err: err,
+			Err: errors.New(fmt.Sprintf("User(id:%d) doesn't own Alamat(id:%d)",
+				userId, alamat.UserId)),
 			Msg: "Anda tidak memiliki akses alamat ini"}
 	}
 
@@ -116,7 +120,8 @@ func (as Alamat) DeleteById(userId, id uint) error {
 	}
 	if alamat.UserId != userId {
 		return oops.Forbidden{
-			Err: err,
+			Err: errors.New(fmt.Sprintf("User(id:%d) doesn't own Alamat(id:%d)",
+				userId, alamat.UserId)),
 			Msg: "Anda tidak memiliki akses alamat ini"}
 	}
 

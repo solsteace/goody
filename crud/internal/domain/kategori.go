@@ -15,9 +15,14 @@ func NewKategori(
 	createdAt time.Time,
 	updatedAt time.Time,
 ) (Kategori, error) {
+	var kategoriId uint = 0
+	if id != nil {
+		kategoriId = *id
+	}
+
 	// TODO: domain validation
 	kategori := Kategori{
-		ID:        *id,
+		ID:        kategoriId,
 		Nama:      nama,
 		CreatedAt: createdAt,
 		UpdatedAt: updatedAt}

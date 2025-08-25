@@ -13,11 +13,28 @@ func NewProduk(repo repository.Produk) Produk {
 	return Produk{repo: repo}
 }
 
-func (ps Produk) GetMany(offset, limit int) (
+func (ps Produk) GetMany(
+	page,
+	limit int,
+	nama string,
+	maxHarga,
+	minHarga,
+	kategoriId,
+	tokoId int,
+) (
 	*struct{ Produk []domain.Produk },
 	error,
 ) {
 	result := new(struct{ Produk []domain.Produk })
+
+	params := repository.NewProdukQueryParams(
+		page, limit, nama, maxHarga, minHarga, kategoriId, tokoId)
+	produk, err := ps.repo.GetMany(params)
+	if err != nil {
+		return result, err
+	}
+
+	result.Produk = produk
 	return result, nil
 }
 
@@ -26,6 +43,13 @@ func (ps Produk) GetById(id uint) (
 	error,
 ) {
 	result := new(struct{ Produk domain.Produk })
+
+	produk, err := ps.repo.GetById(id)
+	if err != nil {
+		return result, err
+	}
+
+	result.Produk = produk
 	return result, nil
 }
 
@@ -41,6 +65,6 @@ func (ps Produk) UpdateById(userId uint, nama string) error {
 	return nil
 }
 
-func (ps Produk) DeleteById(userId uint) error {
+func (ps Produk) DeleteById(userId, id uint) error {
 	return nil
 }
