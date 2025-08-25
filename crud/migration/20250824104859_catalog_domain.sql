@@ -6,8 +6,10 @@ SELECT 'up SQL query';
 CREATE TABLE `kategori`(
     `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `nama_kategori` VARCHAR(255) NOT NULL,
-    `created_at` DATE NOT NULL,
+    `created_at` DATE NOT NULL
+        DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATE NOT NULL
+        DEFAULT CURRENT_TIMESTAMP
 );
 
 
