@@ -12,13 +12,11 @@ func UseProduk(
 	authChecker middleware.AuthChecker,
 ) {
 	produk := (*parent).Group("/produk")
-	v1 := produk.Group("/v1")
+	produk.Get("/", controller.GetMany)
+	produk.Get("/:id", controller.GetById)
 
-	v1.Get("/", controller.GetMany)
-	v1.Get("/:id", controller.GetById)
-
-	v1.Use(authChecker.Handle)
-	v1.Post("/", controller.Create)
-	v1.Put("/:id", controller.UpdateById)
-	v1.Delete("/:id", controller.DeleteById)
+	produk.Use(authChecker.Handle)
+	produk.Post("/", controller.Create)
+	produk.Put("/:id", controller.UpdateById)
+	produk.Delete("/:id", controller.DeleteById)
 }

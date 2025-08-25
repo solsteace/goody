@@ -10,11 +10,9 @@ func UseAlamat(
 	controller *controller.Alamat,
 ) {
 	alamat := (*parent).Group("/alamat")
-	v1 := alamat.Group("/v1")
-
-	v1.Get("/", controller.GetSelf)
-	v1.Get("/:id", controller.GetById)
-	v1.Post("/", controller.CreateForSelf)
-	v1.Put("/:id", controller.UpdateById)
-	v1.Delete("/:id", controller.DeleteById)
+	alamat.Get("/", controller.GetSelf)
+	alamat.Get("/:id", controller.GetById)
+	alamat.Post("/", controller.CreateForSelf)
+	alamat.Put("/:id", controller.UpdateById)
+	alamat.Delete("/:id", controller.DeleteById)
 }

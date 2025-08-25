@@ -13,12 +13,11 @@ func UseKategori(
 	adminChecker := middleware.NewAdminChecker()
 
 	kategori := (*parent).Group("/produk")
-	v1 := kategori.Group("/v1")
-	v1.Get("/", controller.GetById)
-	v1.Get("/:id", controller.GetById)
+	kategori.Get("/", controller.GetById)
+	kategori.Get("/:id", controller.GetById)
 
-	v1.Use(adminChecker.Handle)
-	v1.Post("/:id", controller.Create)
-	v1.Put("/:id", controller.UpdateById)
-	v1.Delete("/:id", controller.DeleteById)
+	kategori.Use(adminChecker.Handle)
+	kategori.Post("/:id", controller.Create)
+	kategori.Put("/:id", controller.UpdateById)
+	kategori.Delete("/:id", controller.DeleteById)
 }

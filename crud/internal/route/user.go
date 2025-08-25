@@ -17,8 +17,7 @@ func UseUser(
 	user.Use(authToken.Handle)
 	UseAlamat(&user, alamatController)
 
-	v1 := user.Group("/v1")
-	v1.Get("/", userController.GetProfile)
-	v1.Put("/", userController.UpdateProfile)
-	v1.Patch("/credentials", userController.ChangeCredentials)
+	user.Get("/", userController.GetProfile)
+	user.Put("/", userController.UpdateProfile)
+	user.Patch("/credentials", userController.ChangeCredentials)
 }

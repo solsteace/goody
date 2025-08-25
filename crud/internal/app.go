@@ -83,11 +83,12 @@ func RunApp() {
 	})
 	app.Use(logger.New())
 	api := app.Group("/api")
-	route.UseAuth(&api, &authController, authToken)
-	route.UseUser(&api, &userController, &alamatController, authToken)
-	// route.UseProduk(&api, &produkController, authToken, userContext)
-	// route.UseToko(&api, &tokoControler)
-	// route.UseKategori(&api, &kategoriController)
+	v1 := api.Group("/v1")
+	route.UseAuth(&v1, &authController, authToken)
+	route.UseUser(&v1, &userController, &alamatController, authToken)
+	// route.UseProduk(&v1, &produkController, authToken, userContext)
+	// route.UseToko(&v1, &tokoControler)
+	// route.UseKategori(&v1, &kategoriController)
 	api.Get("/health", func(c *fiber.Ctx) error {
 		upTime := time.Now().Unix() - upSince
 		return c.SendString(fmt.Sprintf("%d", upTime))

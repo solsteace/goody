@@ -10,10 +10,8 @@ func UseToko(
 	controller *controller.Toko,
 ) {
 	toko := (*parent).Group("/toko")
-	v1 := toko.Group("/v1")
-
-	v1.Get("/my", controller.GetSelf)
-	v1.Get("/:id", controller.GetById)
-	v1.Get("/", controller.GetMany)
-	v1.Put("/:id", controller.UpdateById)
+	toko.Get("/my", controller.GetSelf)
+	toko.Get("/:id", controller.GetById)
+	toko.Get("/", controller.GetMany)
+	toko.Put("/:id", controller.UpdateById)
 }
