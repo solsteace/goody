@@ -77,10 +77,6 @@ func NewGormUser(db *gorm.DB) gormUser {
 	return gormUser{db: db}
 }
 
-func (gu gormUser) Migrate() {
-	gu.db.AutoMigrate(new(gormUserRow))
-}
-
 func (gu gormUser) GetById(id uint) (domain.User, error) {
 	row := new(gormUserRow)
 	result := gu.db.

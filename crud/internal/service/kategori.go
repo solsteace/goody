@@ -61,12 +61,13 @@ func (ks Kategori) Create(nama string) (
 		return result, err
 	}
 
-	kategoriId, err := ks.repo.Create(kategori)
+	idKategori, err := ks.repo.Create(kategori)
 	if err != nil {
 		return result, err
 	}
+	kategori.ID = idKategori
 
-	result.Kategori.ID = kategoriId
+	result.Kategori = kategori
 	return result, nil
 }
 

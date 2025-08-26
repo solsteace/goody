@@ -9,15 +9,16 @@ import (
 func UseKategori(
 	parent *fiber.Router,
 	controller *controller.Kategori,
+	authChecker middleware.AuthChecker,
 ) {
 	adminChecker := middleware.NewAdminChecker()
 
-	kategori := (*parent).Group("/produk")
-	kategori.Get("/", controller.GetById)
+	kategori := (*parent).Group("/kategori")
+	kategori.Get("/", controller.GetMany)
 	kategori.Get("/:id", controller.GetById)
 
-	kategori.Use(adminChecker.Handle)
-	kategori.Post("/:id", controller.Create)
+	kategori.Use(authChecker.Handle, adminChecker.Handle)
+	kategori.Post("/", controller.Create)
 	kategori.Put("/:id", controller.UpdateById)
 	kategori.Delete("/:id", controller.DeleteById)
 }

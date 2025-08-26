@@ -11,10 +11,10 @@ import (
 )
 
 type gormKategoriRow struct {
-	ID        uint      `json:"id"`
-	Nama      string    `json:"nama_kategori"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        uint      `gorm:"column:id"`
+	Nama      string    `gorm:"column:nama_kategori"`
+	CreatedAt time.Time `gorm:"column:created_at"`
+	UpdatedAt time.Time `gorm:"column:updated_at"`
 }
 
 func (row gormKategoriRow) TableName() string {
@@ -83,7 +83,7 @@ func (gk gormKategori) GetById(id uint) (domain.Kategori, error) {
 		case errors.Is(result.Error, gorm.ErrRecordNotFound):
 			return domain.Kategori{}, oops.NotFound{
 				Err: result.Error,
-				Msg: fmt.Sprintf("Kategori(id: %s) tidak ditemukan", id)}
+				Msg: fmt.Sprintf("Kategori(id: %d) tidak ditemukan", id)}
 		default:
 			return domain.Kategori{}, result.Error
 		}
@@ -93,7 +93,7 @@ func (gk gormKategori) GetById(id uint) (domain.Kategori, error) {
 
 func (gk gormKategori) Create(k domain.Kategori) (uint, error) {
 	row := newGormKategoriRow(k)
-	result := gk.db.Create(row)
+	result := gk.db.Create(&row)
 	if result.Error != nil {
 		return 0, result.Error
 	}
@@ -114,7 +114,7 @@ func (gk gormKategori) Update(k domain.Kategori) error {
 func (gk gormKategori) DeleteById(id uint) error {
 	row := new(gormKategoriRow)
 	result := gk.db.
-		Where("id = ?", row.ID).
+		Where("id = ?", id).
 		Delete(&row)
 	if result.Error != nil {
 		return result.Error
