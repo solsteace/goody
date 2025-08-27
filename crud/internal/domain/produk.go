@@ -19,27 +19,37 @@ type Produk struct {
 	Deskripsi     string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
+	FotoProduk    []FotoProduk
 
-	FotoProduk []FotoProduk
+	Toko     Toko
+	Kategori Kategori
 }
 
 func NewProduk(
-	id *uint,
+	id,
 	idToko,
-	idKategori uint,
+	idKategori *uint,
 	nama,
 	slug string,
 	hargaReseller,
 	hargaKonsumen,
-	stok uint,
+	stok int,
 	deskripsi string,
 	createdAt,
 	updatedAt time.Time,
 	fotoProduk []FotoProduk,
 ) (Produk, error) {
-	var produkId uint = 0
+	var actualIdProduk uint = 0
 	if id != nil {
-		produkId = *id
+		actualIdProduk = *id
+	}
+	var actualIdToko uint = 0
+	if idToko != nil {
+		actualIdToko = *idToko
+	}
+	var actualIdKategori uint = 0
+	if idKategori != nil {
+		actualIdKategori = *idKategori
 	}
 
 	switch {
@@ -59,7 +69,7 @@ func NewProduk(
 	}
 
 	for _, fp := range fotoProduk {
-		if fp.IdProduk != produkId {
+		if fp.IdProduk != actualIdProduk {
 			return Produk{}, oops.BadValues{
 				Err: errors.New("`FotoProduk` not belong to `Produk` found"),
 				Msg: "id produk pada foto harus sama dengan id produk"}
@@ -67,46 +77,25 @@ func NewProduk(
 	}
 
 	p := Produk{
-		ID:            *id,
-		IdToko:        idToko,
-		IdKategori:    idKategori,
+		ID:            actualIdProduk,
+		IdToko:        actualIdToko,
+		IdKategori:    actualIdKategori,
 		Nama:          nama,
 		Slug:          slug,
-		HargaReseller: hargaReseller,
-		HargaKonsumen: hargaKonsumen,
-		Stok:          stok,
+		HargaReseller: uint(hargaReseller),
+		HargaKonsumen: uint(hargaKonsumen),
+		Stok:          uint(stok),
 		Deskripsi:     deskripsi,
 		CreatedAt:     createdAt,
-		UpdatedAt:     updatedAt}
+		UpdatedAt:     updatedAt,
+		FotoProduk:    fotoProduk}
 	return p, nil
 }
 
-type FotoProduk struct {
-	ID        uint      `json:"id"`
-	IdProduk  uint      `json:"id_produk"`
-	Url       string    `json:"url"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+func (p *Produk) WithToko(t Toko) {
+	p.Toko = t
 }
 
-func NewFotoProduk(
-	id *uint,
-	idProduk uint,
-	url string,
-	createdAt,
-	updatedAt time.Time,
-) (FotoProduk, error) {
-	var fotoProdukId uint = 0
-	if id != nil {
-		fotoProdukId = *id
-	}
-
-	// TODO: validation
-	fp := FotoProduk{
-		ID:        fotoProdukId,
-		IdProduk:  idProduk,
-		Url:       url,
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt}
-	return fp, nil
+func (p *Produk) WithKategori(k Kategori) {
+	p.Kategori = k
 }

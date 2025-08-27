@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"mime/multipart"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -36,7 +37,7 @@ func (pc Produk) GetMany(c *fiber.Ctx) error {
 	categoryId := c.QueryInt("category_id")
 
 	result, err := pc.service.GetMany(
-		page, limit, nama, minHarga, maxHarga, tokoId, categoryId)
+		page, limit, nama, maxHarga, minHarga, categoryId, tokoId)
 	if err != nil {
 		return err
 	}
@@ -62,30 +63,124 @@ func (pc Produk) GetById(c *fiber.Ctx) error {
 }
 
 func (pc Produk) Create(c *fiber.Ctx) error {
-	reqPayload := new(struct {
-		NamaProduk    string `json:"nama_produk"`
-		HargaReseller int    `json:"harga_reseller"`
-		HargaKonsumer int    `json:"harga_konsumen"`
-		Stok          int    `json:"Stok"`
-	})
-	if err := c.BodyParser(&reqPayload); err != nil {
-		return err
-	}
-
-	// Take photo
-
-	return c.SendStatus(http.StatusNotImplemented)
-}
-
-func (pc Produk) UpdateById(c *fiber.Ctx) error {
-	_, ok := c.Locals("Authorization").(*token.Auth)
+	auth, ok := c.Locals("Authorization").(*token.Auth)
 	if !ok {
 		return oops.Unauthorized{
 			Err: errors.New("Payload wasn't found on `Authorization` token"),
 			Msg: "Tidak ditemukan payload yang sesuai pada token"}
 	}
 
-	return c.SendStatus(http.StatusNotImplemented)
+	reqPayload := new(struct {
+		NamaProduk    string `form:"nama_produk"`
+		HargaReseller int    `form:"harga_reseller"`
+		HargaKonsumer int    `form:"harga_konsumen"`
+		Stok          int    `form:"stok"`
+		Deskripsi     string `form:"deskripsi"`
+		IdKategori    uint   `form:"category_id"`
+	})
+	if err := c.BodyParser(reqPayload); err != nil {
+		return err
+	}
+
+	form, err := c.MultipartForm()
+	if err != nil {
+		return err
+	}
+
+	foto, ok := form.File["photos"]
+	if !ok {
+		foto = []*multipart.FileHeader{}
+	}
+
+	for _, f := range foto {
+		switch f.Header["Content-Type"][0] {
+		case "image/jpeg", "image/webp", "image/png": // Let's say we only accept jpg, jpeg, webp, and png
+		default:
+			return oops.BadRequest{
+				Err: errors.New("Mime type should be either image/jpg, image/webp, or image/png"),
+				Msg: "File yang dikirim harus dalam format .jpg, .jpeg, .webp, atau .png"}
+		}
+	}
+
+	result, err := pc.service.Create(
+		auth.UserId,
+		reqPayload.IdKategori,
+		reqPayload.NamaProduk,
+		reqPayload.HargaReseller,
+		reqPayload.HargaKonsumer,
+		reqPayload.Stok,
+		reqPayload.Deskripsi,
+		foto,
+		c.SaveFile) // The storing mechanism is coupled to the framework :/
+	if err != nil {
+		return err
+	}
+
+	resPayload := pc.viewer.Produk(result.Produk)
+	return c.
+		Status(http.StatusOK).
+		JSON(pc.payloader.Ok(c.Method(), resPayload))
+}
+
+func (pc Produk) UpdateById(c *fiber.Ctx) error {
+	auth, ok := c.Locals("Authorization").(*token.Auth)
+	if !ok {
+		return oops.Unauthorized{
+			Err: errors.New("Payload wasn't found on `Authorization` token"),
+			Msg: "Tidak ditemukan payload yang sesuai pada token"}
+	}
+	reqPayload := new(struct {
+		NamaProduk    string `form:"nama_produk"`
+		HargaReseller int    `form:"harga_reseller"`
+		HargaKonsumer int    `form:"harga_konsumen"`
+		Stok          int    `form:"stok"`
+		Deskripsi     string `form:"deskripsi"`
+		IdKategori    uint   `form:"category_id"`
+	})
+	if err := c.BodyParser(reqPayload); err != nil {
+		return err
+	}
+
+	form, err := c.MultipartForm()
+	if err != nil {
+		return err
+	}
+
+	foto, ok := form.File["photos"]
+	if !ok {
+		foto = []*multipart.FileHeader{}
+	}
+
+	for _, f := range foto {
+		switch f.Header["Content-Type"][0] {
+		case "image/jpeg", "image/webp", "image/png": // Let's say we only accept jpg, jpeg, webp, and png
+		default:
+			return oops.BadRequest{
+				Err: errors.New("Mime type should be either image/jpg, image/webp, or image/png"),
+				Msg: "File yang dikirim harus dalam format .jpg, .jpeg, .webp, atau .png"}
+		}
+	}
+
+	idProduk, _ := c.ParamsInt("id", 0)
+	err = pc.service.UpdateById(
+		auth.UserId,
+		uint(idProduk),
+		reqPayload.IdKategori,
+		reqPayload.NamaProduk,
+		reqPayload.HargaReseller,
+		reqPayload.HargaKonsumer,
+		reqPayload.Stok,
+		reqPayload.Deskripsi,
+		foto,
+		c.SaveFile) // The storing mechanism is coupled to the framework :/
+	if err != nil {
+		return err
+	}
+
+	resPayload := ""
+	return c.
+		Status(http.StatusOK).
+		JSON(pc.payloader.Ok(c.Method(), resPayload))
 }
 
 func (pc Produk) DeleteById(c *fiber.Ctx) error {

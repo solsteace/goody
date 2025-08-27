@@ -8,7 +8,7 @@ import (
 )
 
 type gormTokoRow struct {
-	ID        uint      `gorm:"column:id"`
+	ID        uint      `gorm:"column:id;primaryKey"`
 	IdUser    uint      `gorm:"column:id_user"`
 	NamaToko  string    `gorm:"column:nama_toko"`
 	UrlFoto   string    `gorm:"column:url_foto"`

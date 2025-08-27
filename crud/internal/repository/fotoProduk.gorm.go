@@ -7,15 +7,24 @@ import (
 )
 
 type gormFotoProdukRow struct {
-	ID        uint      `gorm:"id"`
-	IdProduk  uint      `gorm:"id_produk"`
-	Url       string    `gorm:"url"`
-	CreatedAt time.Time `gorm:"created_at"`
-	UpdatedAt time.Time `gorm:"updated_at"`
+	ID        uint      `gorm:"column:id;primaryKey"`
+	IdProduk  uint      `gorm:"column:id_produk"`
+	Url       string    `gorm:"column:url"`
+	CreatedAt time.Time `gorm:"column:created_at"`
+	UpdatedAt time.Time `gorm:"column:updated_at"`
 }
 
 func (row gormFotoProdukRow) TableName() string {
 	return "foto_produk"
+}
+
+func (row gormFotoProdukRow) toFotoProduk() (domain.FotoProduk, error) {
+	return domain.NewFotoProduk(
+		&row.ID,
+		&row.IdProduk,
+		row.Url,
+		row.CreatedAt,
+		row.UpdatedAt)
 }
 
 func NewGormFotoProdukRow(fp domain.FotoProduk) gormFotoProdukRow {
@@ -25,13 +34,4 @@ func NewGormFotoProdukRow(fp domain.FotoProduk) gormFotoProdukRow {
 		Url:       fp.Url,
 		CreatedAt: fp.CreatedAt,
 		UpdatedAt: fp.UpdatedAt}
-}
-
-func (row gormFotoProdukRow) toFotoProduk() (domain.FotoProduk, error) {
-	return domain.NewFotoProduk(
-		&row.ID,
-		row.IdProduk,
-		row.Url,
-		row.CreatedAt,
-		row.UpdatedAt)
 }

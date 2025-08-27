@@ -78,7 +78,7 @@ func (tc Toko) UpdateById(c *fiber.Ctx) error {
 	}
 
 	reqPayload := new(struct {
-		NamaToko string `json:"nama_toko"`
+		NamaToko string `form:"nama_toko"`
 	})
 	if err := c.BodyParser(&reqPayload); err != nil {
 		return err

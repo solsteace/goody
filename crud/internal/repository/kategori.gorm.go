@@ -11,7 +11,7 @@ import (
 )
 
 type gormKategoriRow struct {
-	ID        uint      `gorm:"column:id"`
+	ID        uint      `gorm:"column:id;primaryKey"`
 	Nama      string    `gorm:"column:nama_kategori"`
 	CreatedAt time.Time `gorm:"column:created_at"`
 	UpdatedAt time.Time `gorm:"column:updated_at"`

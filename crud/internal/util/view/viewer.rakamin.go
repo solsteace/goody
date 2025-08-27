@@ -144,11 +144,62 @@ func (r rakamin) ManyToko(toko []domain.Toko) []any {
 	return view
 }
 
+type rakaminFotoProduk struct {
+	Id       uint   `json:"id"`
+	IdProduk uint   `json:"product_id"`
+	Url      string `json:"url"`
+}
+
+func (r rakamin) FotoProduk(fp domain.FotoProduk) any {
+	return rakaminFotoProduk{
+		Id:       fp.ID,
+		IdProduk: fp.IdProduk,
+		Url:      fp.Url}
+}
+
+func (r rakamin) ManyFotoProduk(fotoProduk []domain.FotoProduk) []any {
+	view := []any{}
+	for _, fp := range fotoProduk {
+		view = append(view, r.FotoProduk(fp))
+	}
+	return view
+}
+
 type rakaminProduk struct {
+	Id            uint   `json:"id"`
+	Nama          string `json:"nama_produk"`
+	Slug          string `json:"slug"`
+	HargaReseller uint   `json:"harga_reseller"`
+	HargaKonsumen uint   `json:"harga_konsumen"`
+	Stok          uint   `json:"stok"`
+	Deskripsi     string `json:"deskripsi"`
+
+	Toko       rakaminToko         `json:"toko"`
+	Kategori   rakaminKategori     `json:"category"`
+	FotoProduk []rakaminFotoProduk `json:"photos"`
 }
 
 func (r rakamin) Produk(produk domain.Produk) any {
-	return rakaminProduk{}
+	toko, _ := r.Toko(produk.Toko).(rakaminToko)
+	kategori, _ := r.Kategori(produk.Kategori).(rakaminKategori)
+
+	fotoProduk := []rakaminFotoProduk{}
+	for _, fp := range produk.FotoProduk {
+		viewFotoProduk, _ := r.FotoProduk(fp).(rakaminFotoProduk)
+		fotoProduk = append(fotoProduk, viewFotoProduk)
+	}
+
+	return rakaminProduk{
+		Id:            produk.ID,
+		Nama:          produk.Nama,
+		Slug:          produk.Slug,
+		HargaReseller: produk.HargaReseller,
+		HargaKonsumen: produk.HargaKonsumen,
+		Stok:          produk.Stok,
+		Deskripsi:     produk.Deskripsi,
+		Toko:          toko,
+		Kategori:      kategori,
+		FotoProduk:    fotoProduk}
 }
 
 func (r rakamin) ManyProduk(produk []domain.Produk) []any {

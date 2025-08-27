@@ -51,28 +51,31 @@ func RunApp() {
 	// ========================================
 	// Layers...
 	// ========================================
-	authToken := middleware.NewAuthToken(jwtAuth)
+	authChecker := middleware.NewAuthToken(jwtAuth)
 	errorHandler := middleware.NewErrorHandler(payloader)
 
 	alamatRepo := repository.NewGormAlamat(db)
 	userRepo := repository.NewGormUser(db)
 	kategoriRepo := repository.NewGormKategori(db)
-	// produkRepo := repository.NewGormProduk(db)
-	// tokoRepo := repository.NewGormToko(db)
+	tokoRepo := repository.NewGormToko(db)
+	produkRepo := repository.NewGormProduk(db)
+	// transaksiRepo := repository.NewGormTransaksi(db)
 
 	authService := service.NewAuth(userRepo, cryptor, jwtAuth)
 	alamatService := service.NewAlamat(alamatRepo)
 	userService := service.NewUser(userRepo, cryptor)
 	kategoriService := service.NewKategori(kategoriRepo)
-	// tokoService := service.NewToko(tokoRepo, savePaths["toko"])
-	// produkService := service.NewProduk(produkRepo, savePaths["produk"])
+	tokoService := service.NewToko(tokoRepo, savePaths["toko"])
+	produkService := service.NewProduk(produkRepo, tokoRepo, savePaths["produk"])
+	// transaksiService := service.NewTransaksi(produkRepo)
 
 	authController := controller.NewAuth(&authService, viewer, payloader)
 	alamatController := controller.NewAlamat(&alamatService, viewer, payloader)
 	userController := controller.NewUser(&userService, viewer, payloader)
 	kategoriController := controller.NewKategori(kategoriService, viewer, payloader)
-	// tokoControler := controller.NewToko(tokoService, viewer)
-	// produkController := controller.NewProduk(produkService, viewer, payloader)
+	tokoControler := controller.NewToko(tokoService, viewer)
+	produkController := controller.NewProduk(produkService, viewer, payloader)
+	// transaksiController := controller.NewProduk(transaksiService, viewer, payloader)
 
 	// ========================================
 	// Routings...
@@ -83,11 +86,12 @@ func RunApp() {
 	app.Use(logger.New())
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
-	route.UseAuth(&v1, &authController, authToken)
-	route.UseUser(&v1, &userController, &alamatController, authToken)
-	route.UseKategori(&v1, &kategoriController, authToken)
-	// route.UseToko(&v1, &tokoControler)
-	// route.UseProduk(&v1, &produkController, authToken, userContext)
+	route.UseAuth(&v1, &authController, authChecker)
+	route.UseUser(&v1, &userController, &alamatController, authChecker)
+	route.UseKategori(&v1, &kategoriController, authChecker)
+	route.UseToko(&v1, &tokoControler, authChecker)
+	route.UseProduk(&v1, &produkController, authChecker)
+	// route.UseTransaksi(&v1, &produkController, authToken)
 
 	api.Get("/health", func(c *fiber.Ctx) error {
 		upTime := time.Now().Unix() - upSince
