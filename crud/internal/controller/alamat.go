@@ -153,6 +153,6 @@ func (ac Alamat) DeleteById(c *fiber.Ctx) error {
 
 	resPayload := ""
 	return c.
-		Status(http.StatusCreated).
+		Status(http.StatusOK).
 		JSON(ac.payloader.Ok(c.Method(), resPayload))
 }
