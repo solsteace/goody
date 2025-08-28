@@ -130,7 +130,7 @@ func (gp gormProduk) GetMany(params produkQueryParams) ([]domain.Produk, error) 
 	rows := new([]gormProdukRow)
 	result := query.Find(rows)
 	if result.Error != nil {
-		return []domain.Produk{}, nil
+		return []domain.Produk{}, result.Error
 	}
 
 	produk := []domain.Produk{}
@@ -165,7 +165,7 @@ func (gp gormProduk) GetById(id uint) (domain.Produk, error) {
 
 	produk, err := row.toProduk()
 	if err != nil {
-		return domain.Produk{}, nil
+		return domain.Produk{}, err
 	}
 	return produk, nil
 }

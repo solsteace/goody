@@ -159,7 +159,7 @@ func (ps Produk) Create(
 
 	newProduk, err := ps.repo.GetById(idProduk)
 	if err != nil {
-		return result, nil
+		return result, err
 	}
 	result.Produk = newProduk
 	return result, nil

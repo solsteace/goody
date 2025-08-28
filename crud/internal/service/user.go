@@ -72,7 +72,7 @@ func (us User) ChangeCredentials(
 
 	user, err := us.userRepo.GetById(userId)
 	if err != nil {
-		return result, nil
+		return result, err
 	}
 
 	if err := us.cryptor.Compare(user.KataSandi, sandiLama); err != nil {

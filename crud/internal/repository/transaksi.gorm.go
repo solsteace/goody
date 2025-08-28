@@ -116,7 +116,7 @@ func (gt gormTransaksi) GetMany(q transaksiQueryParams) ([]domain.Transaksi, err
 	for _, row := range *rows {
 		t, err := row.ToTransaksi()
 		if err != nil {
-			return []domain.Transaksi{}, nil
+			return []domain.Transaksi{}, err
 		}
 		transaksi = append(transaksi, t)
 	}
