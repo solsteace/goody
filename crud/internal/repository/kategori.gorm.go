@@ -45,11 +45,11 @@ func NewGormKategori(db *gorm.DB) gormKategori {
 	return gormKategori{db: db}
 }
 
-func (gk gormKategori) GetMany(page, limit int) ([]domain.Kategori, error) {
+func (gk gormKategori) GetMany(q kategoriQueryParams) ([]domain.Kategori, error) {
 	rows := new([]gormKategoriRow)
 	result := gk.db.
-		Offset(kategoriOffset(page, limit)).
-		Limit(limit).
+		Offset(q.offset()).
+		Limit(q.limit).
 		Find(&rows)
 	if result.Error != nil {
 		switch {

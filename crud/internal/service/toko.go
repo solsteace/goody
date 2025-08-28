@@ -28,7 +28,9 @@ func (ts Toko) GetMany(page, limit int) (
 	error,
 ) {
 	result := new(struct{ Toko []domain.Toko })
-	toko, err := ts.repo.GetMany(page, limit)
+
+	query := repository.NewTokoQueryParams(page, limit)
+	toko, err := ts.repo.GetMany(query)
 	if err != nil {
 		return result, err
 	}

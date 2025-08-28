@@ -7,6 +7,8 @@ import (
 	"github.com/solsteace/goody/lib/oops"
 )
 
+const transaksiDefaultPageSize = 10
+
 type Transaksi interface {
 	GetMany(q transaksiQueryParams) ([]domain.Transaksi, error)
 	GetById(id uint) (domain.Transaksi, error)
@@ -39,12 +41,10 @@ func NewDetailTransaksiEntry(idProduk uint, kuantitas int) (DetailTransaksiEntry
 	return DetailTransaksiEntry{idProduk, uint(kuantitas)}, nil
 }
 
-const transaksiDefaultPageSize = 10
-
 type transaksiQueryParams struct {
 	page   int
 	limit  int
-	IdUser *uint
+	idUser uint
 }
 
 func (param transaksiQueryParams) offset() int {
@@ -69,8 +69,13 @@ func NewTransaksiQueryParams(
 		actualLimit = limit
 	}
 
+	var actualIdUser uint = 0
+	if idUser != nil {
+		actualIdUser = *idUser
+	}
+
 	return transaksiQueryParams{
 		page:   actualPage,
 		limit:  actualLimit,
-		IdUser: idUser}
+		idUser: actualIdUser}
 }

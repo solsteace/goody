@@ -38,9 +38,9 @@ func NewProdukQueryParams(
 	limit int,
 	nama string,
 	maxHarga,
-	minHarga,
+	minHarga int,
 	kategoriId,
-	tokoId int,
+	tokoId *int,
 ) produkQueryParams {
 	actualPage := 0
 	if page != 0 {
@@ -62,12 +62,22 @@ func NewProdukQueryParams(
 		actualMaxHarga = uint64(maxHarga)
 	}
 
+	var actualKategoriId int = 0
+	if kategoriId != nil {
+		actualKategoriId = *kategoriId
+	}
+
+	var actualTokoId int = 0
+	if tokoId != nil {
+		actualTokoId = *tokoId
+	}
+
 	return produkQueryParams{
 		page:       actualPage,
 		limit:      actualLimit,
 		minHarga:   actualMinHarga,
 		maxHarga:   actualMaxHarga,
 		nama:       nama,
-		kategoriId: kategoriId,
-		tokoId:     tokoId}
+		kategoriId: actualKategoriId,
+		tokoId:     actualTokoId}
 }

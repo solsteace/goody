@@ -57,18 +57,17 @@ func NewGormAlamat(db *gorm.DB) gormAlamat {
 	return gormAlamat{db: db}
 }
 
-func (ga gormAlamat) GetManyByUserId(
-	id uint,
-	judul string,
-	page,
-	limit int,
-) ([]domain.Alamat, error) {
+func (ga gormAlamat) GetManyByUserId(q alamatQueryParams) ([]domain.Alamat, error) {
 	rows := new([]gormAlamatRow)
-	result := ga.db.
-		Where("id_user = ? AND judul_alamat LIKE ?", id, "%"+judul+"%").
-		Offset(alamatOffset(page, limit)).
-		Limit(limit).
-		Find(&rows)
+	query := ga.db.
+		Where("judul_alamat LIKE ?", "%"+q.judul+"%").
+		Offset(q.offset()).
+		Limit(q.limit)
+	if q.idUser != 0 {
+		query = query.Where("id_user = ?", q.idUser)
+	}
+
+	result := ga.db.Find(rows)
 	if result.Error != nil {
 		switch {
 		case errors.Is(result.Error, gorm.ErrRecordNotFound):
@@ -95,7 +94,7 @@ func (ga gormAlamat) GetById(id uint) (domain.Alamat, error) {
 	row := new(gormAlamatRow)
 	result := ga.db.
 		Where("id = ?", id).
-		First(&row)
+		First(row)
 	if result.Error != nil {
 		switch {
 		case errors.Is(result.Error, gorm.ErrRecordNotFound):
@@ -144,7 +143,7 @@ func (ga gormAlamat) DeleteById(id uint) error {
 	row := new(gormAlamatRow)
 	result := ga.db.
 		Where("id = ?", id).
-		Delete(&row)
+		Delete(row)
 	if result.Error != nil {
 		return result.Error
 	}

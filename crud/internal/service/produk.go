@@ -82,7 +82,7 @@ func (ps Produk) GetMany(
 	result := new(struct{ Produk []domain.Produk })
 
 	params := repository.NewProdukQueryParams(
-		page, limit, nama, maxHarga, minHarga, kategoriId, tokoId)
+		page, limit, nama, maxHarga, minHarga, &kategoriId, &tokoId)
 	produk, err := ps.repo.GetMany(params)
 	if err != nil {
 		return result, err

@@ -103,8 +103,8 @@ func (gt gormTransaksi) GetMany(q transaksiQueryParams) ([]domain.Transaksi, err
 		Preload("DetailTransaksi.LogProduk.Produk.FotoProduk").
 		Offset(q.offset()).
 		Limit(q.limit)
-	if q.IdUser != nil {
-		query = query.Where("id_user = ?", q.IdUser)
+	if q.idUser != 0 {
+		query = query.Where("id_user = ?", q.idUser)
 	}
 
 	result := query.Find(&rows)

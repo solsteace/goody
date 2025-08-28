@@ -21,7 +21,8 @@ func (ks Kategori) GetMany(page, limit int) (
 ) {
 	result := new(struct{ Kategori []domain.Kategori })
 
-	kategori, err := ks.repo.GetMany(page, limit)
+	query := repository.NewKategoriQueryParams(page, limit)
+	kategori, err := ks.repo.GetMany(query)
 	if err != nil {
 		return result, err
 	}

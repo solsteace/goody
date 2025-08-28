@@ -48,11 +48,11 @@ func NewGormToko(db *gorm.DB) gormToko {
 	return gormToko{db: db}
 }
 
-func (gt gormToko) GetMany(page, limit int) ([]domain.Toko, error) {
+func (gt gormToko) GetMany(q tokoQueryParams) ([]domain.Toko, error) {
 	rows := new([]gormTokoRow)
 	result := gt.db.
-		Offset(tokoOffset(page, limit)).
-		Limit(limit).
+		Offset(q.offset()).
+		Limit(q.limit).
 		Find(&rows)
 	if result.Error != nil {
 		return []domain.Toko{}, result.Error

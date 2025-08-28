@@ -18,12 +18,13 @@ func NewAlamat(repo repository.Alamat) Alamat {
 	return Alamat{repo: repo}
 }
 
-func (as Alamat) GetSelf(userId uint, judul string, page, limit int) (
+func (as Alamat) GetSelf(idUser uint, judul string, page, limit int) (
 	*struct{ Alamat []domain.Alamat }, error,
 ) {
 	result := new(struct{ Alamat []domain.Alamat })
 
-	daftarAlamat, err := as.repo.GetManyByUserId(userId, judul, page, limit)
+	query := repository.NewAlamatQueryParams(page, limit, &idUser, judul)
+	daftarAlamat, err := as.repo.GetManyByUserId(query)
 	if err != nil {
 		return result, err
 	}
