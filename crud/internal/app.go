@@ -59,7 +59,7 @@ func RunApp() {
 	kategoriRepo := repository.NewGormKategori(db)
 	tokoRepo := repository.NewGormToko(db)
 	produkRepo := repository.NewGormProduk(db)
-	// transaksiRepo := repository.NewGormTransaksi(db)
+	transaksiRepo := repository.NewGormTransaksi(db)
 
 	authService := service.NewAuth(userRepo, cryptor, jwtAuth)
 	alamatService := service.NewAlamat(alamatRepo)
@@ -67,7 +67,7 @@ func RunApp() {
 	kategoriService := service.NewKategori(kategoriRepo)
 	tokoService := service.NewToko(tokoRepo, savePaths["toko"])
 	produkService := service.NewProduk(produkRepo, tokoRepo, savePaths["produk"])
-	// transaksiService := service.NewTransaksi(produkRepo)
+	transaksiService := service.NewTransaksi(transaksiRepo, alamatRepo, tokoRepo)
 
 	authController := controller.NewAuth(&authService, viewer, payloader)
 	alamatController := controller.NewAlamat(&alamatService, viewer, payloader)
@@ -75,7 +75,7 @@ func RunApp() {
 	kategoriController := controller.NewKategori(kategoriService, viewer, payloader)
 	tokoControler := controller.NewToko(tokoService, viewer)
 	produkController := controller.NewProduk(produkService, viewer, payloader)
-	// transaksiController := controller.NewProduk(transaksiService, viewer, payloader)
+	transaksiController := controller.NewTransaksi(transaksiService, viewer, payloader)
 
 	// ========================================
 	// Routings...
@@ -91,7 +91,7 @@ func RunApp() {
 	route.UseKategori(&v1, &kategoriController, authChecker)
 	route.UseToko(&v1, &tokoControler, authChecker)
 	route.UseProduk(&v1, &produkController, authChecker)
-	// route.UseTransaksi(&v1, &produkController, authToken)
+	route.UseTransaksi(&v1, &transaksiController, authChecker)
 
 	api.Get("/health", func(c *fiber.Ctx) error {
 		upTime := time.Now().Unix() - upSince

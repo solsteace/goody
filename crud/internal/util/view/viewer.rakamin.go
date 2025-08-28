@@ -182,11 +182,10 @@ type rakaminProduk struct {
 func (r rakamin) Produk(produk domain.Produk) any {
 	toko, _ := r.Toko(produk.Toko).(rakaminToko)
 	kategori, _ := r.Kategori(produk.Kategori).(rakaminKategori)
-
 	fotoProduk := []rakaminFotoProduk{}
 	for _, fp := range produk.FotoProduk {
-		viewFotoProduk, _ := r.FotoProduk(fp).(rakaminFotoProduk)
-		fotoProduk = append(fotoProduk, viewFotoProduk)
+		fpView, _ := r.FotoProduk(fp).(rakaminFotoProduk)
+		fotoProduk = append(fotoProduk, fpView)
 	}
 
 	return rakaminProduk{
@@ -206,6 +205,99 @@ func (r rakamin) ManyProduk(produk []domain.Produk) []any {
 	view := []any{}
 	for _, t := range produk {
 		view = append(view, r.Produk(t))
+	}
+	return view
+}
+
+type rakaminLogProduk struct {
+	ID            uint   `json:"id"`
+	Nama          string `json:"nama_produk"`
+	Slug          string `json:"slug"`
+	HargaReseller uint   `json:"harga_reseller"`
+	HargaKonsumen uint   `json:"harga_konsumen"`
+	Deskripsi     string `json:"deskripsi"`
+
+	Toko     rakaminToko     `json:"toko"`
+	Kategori rakaminKategori `json:"category"`
+}
+
+func (r rakamin) LogProduk(lp domain.LogProduk) any {
+	toko := r.Toko(lp.Toko).(rakaminToko)
+	Kategori := r.Kategori(lp.Kategori).(rakaminKategori)
+
+	return rakaminLogProduk{
+		ID:            lp.ID,
+		Nama:          lp.Nama,
+		Slug:          lp.Slug,
+		HargaReseller: lp.HargaReseller,
+		HargaKonsumen: lp.HargaKonsumen,
+		Deskripsi:     lp.Deskripsi,
+
+		Toko:     toko,
+		Kategori: Kategori}
+}
+
+func (r rakamin) ManyLogProduk(logProduk []domain.LogProduk) []any {
+	view := []any{}
+	for _, lp := range logProduk {
+		view = append(view, r.LogProduk(lp))
+	}
+	return view
+}
+
+type rakaminDetailTransaksi struct {
+	Kuantitas  uint             `json:"kuantitas"`
+	HargaTotal uint             `json:"harga_total"`
+	LogProduk  rakaminLogProduk `json:"product"`
+}
+
+func (r rakamin) DetailTransaksi(dt domain.DetailTransaksi) any {
+	logProduk := r.LogProduk(dt.LogProduk).(rakaminLogProduk)
+	return rakaminDetailTransaksi{
+		Kuantitas:  dt.Kuantitas,
+		HargaTotal: dt.HargaTotal,
+		LogProduk:  logProduk}
+}
+
+func (r rakamin) ManyDetailTransaksi(detailTx []domain.DetailTransaksi) []any {
+	view := []any{}
+	for _, dt := range detailTx {
+		view = append(view, r.DetailTransaksi(dt))
+	}
+	return view
+}
+
+type rakaminTransaksi struct {
+	Id          uint   `json:"id"`
+	HargaTotal  uint   `json:"harga_total"`
+	KodeInvoice string `json:"kode_invoice"`
+	MetodeBayar string `json:"metode_bayar"`
+
+	Alamat          rakaminAlamat            `json:"alamat_kirim"`
+	DetailTransaksi []rakaminDetailTransaksi `json:"detail_trx"`
+}
+
+func (r rakamin) Transaksi(t domain.Transaksi) any {
+	alamat, _ := r.Alamat(t.Alamat).(rakaminAlamat)
+	detailTransaksi := []rakaminDetailTransaksi{}
+	for _, dt := range t.DetailTransaksi {
+		dtView := r.DetailTransaksi(dt).(rakaminDetailTransaksi)
+		detailTransaksi = append(detailTransaksi, dtView)
+	}
+
+	return rakaminTransaksi{
+		Id:              t.ID,
+		HargaTotal:      t.HargaTotal,
+		MetodeBayar:     t.MetodeBayar,
+		KodeInvoice:     t.KodeInvoice,
+		Alamat:          alamat,
+		DetailTransaksi: detailTransaksi}
+}
+
+func (r rakamin) ManyTransaksi(transaksi []domain.Transaksi) []any {
+	view := []any{}
+	for _, t := range transaksi {
+		view = append(view, r.Transaksi(t))
 	}
 	return view
 }
