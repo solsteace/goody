@@ -10,6 +10,7 @@ import (
 
 	"github.com/solsteace/goody/crud/internal/domain"
 	"github.com/solsteace/goody/crud/internal/repository"
+	"github.com/solsteace/goody/lib/oops"
 )
 
 type Toko struct {
@@ -108,11 +109,15 @@ func (ts Toko) UpdateById(
 	case err != nil:
 		return err
 	case toko.IdUser != idUser:
-		return errors.New("You don't own this `Toko`")
+		return oops.Forbidden{
+			Err: errors.New("You don't own this `Toko`"),
+			Msg: "Anda tidak mengelola toko ini"}
 	}
 
 	if file.Size > 2*1024*1024 { // unit in Bytes
-		return errors.New("File is larger than 2 MB")
+		return oops.BadRequest{
+			Err: errors.New("File is larger than 2 MB"),
+			Msg: "Ukuran maksimal satu file adalah 2 MB"}
 	}
 
 	saveDir := path.Join(ts.savePath, fmt.Sprintf("%d", id))

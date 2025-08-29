@@ -9,6 +9,7 @@ import (
 	"github.com/solsteace/goody/crud/internal/util/view"
 	"github.com/solsteace/goody/lib/oops"
 	"github.com/solsteace/goody/lib/payload"
+	"github.com/solsteace/goody/lib/token"
 )
 
 type Toko struct {
@@ -17,8 +18,12 @@ type Toko struct {
 	payloader payload.Loader
 }
 
-func NewToko(service service.Toko, viewer view.Toko) Toko {
-	return Toko{viewer: viewer, service: service}
+func NewToko(
+	service service.Toko,
+	viewer view.Toko,
+	payloader payload.Loader,
+) Toko {
+	return Toko{service, viewer, payloader}
 }
 
 func (tc Toko) GetMany(c *fiber.Ctx) error {
@@ -38,14 +43,14 @@ func (tc Toko) GetMany(c *fiber.Ctx) error {
 }
 
 func (tc Toko) GetSelf(c *fiber.Ctx) error {
-	idUser, ok := c.Locals("userId").(uint)
+	auth, ok := c.Locals("Authorization").(*token.Auth)
 	if !ok {
 		return oops.Unauthorized{
-			Err: errors.New("Couldn't extract `userId`"),
-			Msg: "Data `userId` tidak ditemukan "}
+			Err: errors.New("Payload wasn't found on `Authorization` token"),
+			Msg: "Tidak ditemukan payload yang sesuai pada token"}
 	}
 
-	result, err := tc.service.GetByOwnerId(idUser)
+	result, err := tc.service.GetByOwnerId(auth.UserId)
 	if err != nil {
 		return err
 	}
@@ -70,17 +75,17 @@ func (tc Toko) GetById(c *fiber.Ctx) error {
 }
 
 func (tc Toko) UpdateById(c *fiber.Ctx) error {
-	idUser, ok := c.Locals("userId").(uint)
+	auth, ok := c.Locals("Authorization").(*token.Auth)
 	if !ok {
 		return oops.Unauthorized{
-			Err: errors.New("Couldn't extract `userId`"),
-			Msg: "Data `userId` tidak ditemukan "}
+			Err: errors.New("Payload wasn't found on `Authorization` token"),
+			Msg: "Tidak ditemukan payload yang sesuai pada token"}
 	}
 
 	reqPayload := new(struct {
 		NamaToko string `form:"nama_toko"`
 	})
-	if err := c.BodyParser(&reqPayload); err != nil {
+	if err := c.BodyParser(reqPayload); err != nil {
 		return err
 	}
 
@@ -104,11 +109,10 @@ func (tc Toko) UpdateById(c *fiber.Ctx) error {
 			Msg: "File yang dikirim harus dalam format .jpg, .jpeg, .webp, atau .png"}
 	}
 
-	// A lil' stinks, but this'll do. We'll refactor it later somehow
 	idToko, _ := c.ParamsInt("id", 0)
 	err = tc.service.UpdateById(
 		uint(idToko),
-		idUser,
+		auth.UserId,
 		reqPayload.NamaToko,
 		foto,
 		func(savePath string) error {

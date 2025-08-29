@@ -73,7 +73,7 @@ func RunApp() {
 	alamatController := controller.NewAlamat(&alamatService, viewer, payloader)
 	userController := controller.NewUser(&userService, viewer, payloader)
 	kategoriController := controller.NewKategori(kategoriService, viewer, payloader)
-	tokoControler := controller.NewToko(tokoService, viewer)
+	tokoControler := controller.NewToko(tokoService, viewer, payloader)
 	produkController := controller.NewProduk(produkService, viewer, payloader)
 	transaksiController := controller.NewTransaksi(transaksiService, viewer, payloader)
 

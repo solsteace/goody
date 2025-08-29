@@ -1,9 +1,12 @@
 package repository
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/solsteace/goody/crud/internal/domain"
+	"github.com/solsteace/goody/lib/oops"
 	"gorm.io/gorm"
 )
 
@@ -75,7 +78,14 @@ func (gt gormToko) GetById(id uint) (domain.Toko, error) {
 		Where("id = ?", id).
 		First(&row)
 	if result.Error != nil {
-		return domain.Toko{}, result.Error
+		switch {
+		case errors.Is(result.Error, gorm.ErrRecordNotFound):
+			return domain.Toko{}, oops.NotFound{
+				Err: result.Error,
+				Msg: fmt.Sprintf("Toko(id: %d) tidak ditemukan", id)}
+		default:
+			return domain.Toko{}, result.Error
+		}
 	}
 	return row.toToko()
 }
@@ -100,13 +110,20 @@ func (gt gormToko) Update(t domain.Toko) error {
 	return nil
 }
 
-func (gt gormToko) GetByOwnerId(userId uint) (domain.Toko, error) {
+func (gt gormToko) GetByOwnerId(idUser uint) (domain.Toko, error) {
 	row := new(gormTokoRow)
 	result := gt.db.
-		Where("id_user = ?", userId).
+		Where("id_user = ?", idUser).
 		First(&row)
 	if result.Error != nil {
-		return domain.Toko{}, result.Error
+		switch {
+		case errors.Is(result.Error, gorm.ErrRecordNotFound):
+			return domain.Toko{}, oops.NotFound{
+				Err: result.Error,
+				Msg: fmt.Sprintf("Toko(userId: %d) tidak ditemukan", idUser)}
+		default:
+			return domain.Toko{}, result.Error
+		}
 	}
 	return row.toToko()
 }

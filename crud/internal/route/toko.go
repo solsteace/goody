@@ -12,7 +12,7 @@ func UseToko(
 	authChecker middleware.AuthChecker,
 ) {
 	toko := (*parent).Group("/toko")
-	toko.Get("/my", controller.GetSelf)
+	toko.Get("/my", authChecker.Handle, controller.GetSelf)
 	toko.Get("/:id", controller.GetById)
 	toko.Get("/", controller.GetMany)
 
