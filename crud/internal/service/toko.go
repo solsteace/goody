@@ -131,8 +131,9 @@ func (ts Toko) UpdateById(
 	if len(file.Filename) > 32 {
 		startIdx = len(file.Filename) - 32
 	}
-	savePath := path.Join(saveDir, file.Filename[startIdx:])
-	if err := save(savePath); err != nil {
+	fileName := file.Filename[startIdx:]
+	fileSavePath := path.Join(saveDir, fileName)
+	if err := save(fileSavePath); err != nil {
 		return err
 	}
 
@@ -142,7 +143,7 @@ func (ts Toko) UpdateById(
 	}
 
 	toko.NamaToko = namaToko
-	toko.UrlFoto = savePath
+	toko.UrlFoto = fileName
 	toko.UpdatedAt = time.Now()
 	return ts.repo.Update(toko)
 }
