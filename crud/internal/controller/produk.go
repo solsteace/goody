@@ -118,7 +118,7 @@ func (pc Produk) Create(c *fiber.Ctx) error {
 
 	resPayload := pc.viewer.Produk(result.Produk)
 	return c.
-		Status(http.StatusOK).
+		Status(http.StatusCreated).
 		JSON(pc.payloader.Ok(c.Method(), resPayload))
 }
 

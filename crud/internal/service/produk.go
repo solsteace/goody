@@ -38,7 +38,9 @@ func (ps Produk) handleFoto(
 	dirName := uuid.New().String()
 	for _, file := range files {
 		if file.Size > 2*1024*1024 { // unit in Bytes
-			return []domain.FotoProduk{}, errors.New("File is larger than 2 MB")
+			return []domain.FotoProduk{}, oops.BadRequest{
+				Err: errors.New("File is larger than 2 MB"),
+				Msg: "File diunggah melebihi 2MB"}
 		}
 
 		saveDirPath := path.Join(ps.savePath, fmt.Sprintf("%s", dirName))

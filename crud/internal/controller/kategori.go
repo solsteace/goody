@@ -34,7 +34,7 @@ func (kc Kategori) GetMany(c *fiber.Ctx) error {
 
 	resPayload := kc.viewer.ManyKategori(result.Kategori)
 	return c.
-		Status(http.StatusCreated).
+		Status(http.StatusOK).
 		JSON(kc.payloader.Ok(c.Method(), resPayload))
 }
 
@@ -47,7 +47,7 @@ func (kc Kategori) GetById(c *fiber.Ctx) error {
 
 	resPayload := kc.viewer.Kategori(result.Kategori)
 	return c.
-		Status(http.StatusCreated).
+		Status(http.StatusOK).
 		JSON(kc.payloader.Ok(c.Method(), resPayload))
 }
 
