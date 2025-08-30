@@ -223,6 +223,7 @@ func (gt gormTransaksi) Create(
 				Slug:          produk.Slug,
 				HargaReseller: produk.HargaReseller,
 				HargaKonsumen: produk.HargaKonsumen,
+				Deskripsi:     produk.Deskripsi,
 				CreatedAt:     now,
 				UpdatedAt:     now}
 
